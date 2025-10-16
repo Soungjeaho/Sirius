@@ -13,6 +13,10 @@ public class Reelback : MonoBehaviour
     [SerializeField] private float maxReelDistance = 10f;
     [SerializeField] private LayerMask ReelbackLayer;
 
+    [Header("Cost")]
+    [SerializeField] private EnergyGauge playerGauge;
+    [SerializeField] private int gaugeCost = 3;
+
     private Rigidbody2D playerRb;
     private Vector2 bobberPoint;
     private Rigidbody2D pulledEnemy;
@@ -42,16 +46,28 @@ public class Reelback : MonoBehaviour
             if (distance > maxReelDistance)
             {
                 Debug.Log("Reelback 실패: 최대 사거리 초과");
-                return;
+                return; // 거리 초과면 바로 종료, 게이지 사용 X
             }
 
             Collider2D hit = Physics2D.OverlapCircle(mouseWorld, 0.1f, ReelbackLayer);
             if (hit != null)
             {
                 if (hit.CompareTag("Reelbackable"))
-                    StartReelback(mouseWorld);
+                { 
+                        StartReelback(mouseWorld);                
+                }
                 else if (hit.CompareTag("Enemy"))
-                    StartPullEnemy(hit.GetComponent<Rigidbody2D>());
+                {
+                    // 적 끌기 스킬
+                    if (playerGauge.UseGauge(gaugeCost)) // 성공적으로 발동될 때만 게이지 차감
+                        StartPullEnemy(hit.GetComponent<Rigidbody2D>());
+                    else
+                        Debug.Log("게이지가 부족합니다!");
+                }
+            }
+            else
+            {
+                Debug.Log("Reelback 실패: 대상 없음");
             }
         }
 
