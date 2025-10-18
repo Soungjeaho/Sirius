@@ -2,33 +2,38 @@ using UnityEngine;
 
 public class UIManager : MonoBehaviour
 {
-    public static UIManager Instance;
+    public static UIManager Instance { get; private set; }
 
+    [Header("UI Panels")]
     public GameObject inventoryUI;
     public GameObject mapUI;
     public GameObject menuUI;
 
-    void Awake()
+    private void Awake()
     {
-        if (Instance == null) Instance = this;
-        else Destroy(gameObject);
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+        Instance = this;
     }
 
     public void ToggleInventory()
     {
-        if (inventoryUI == null) return;
-        inventoryUI.SetActive(!inventoryUI.activeSelf);
+        if (inventoryUI != null)
+            inventoryUI.SetActive(!inventoryUI.activeSelf);
     }
 
     public void ToggleMap()
     {
-        if (mapUI == null) return;
-        mapUI.SetActive(!mapUI.activeSelf);
+        if (mapUI != null)
+            mapUI.SetActive(!mapUI.activeSelf);
     }
 
     public void ToggleMenu()
     {
-        if (menuUI == null) return;
-        menuUI.SetActive(!menuUI.activeSelf);
+        if (menuUI != null)
+            menuUI.SetActive(!menuUI.activeSelf);
     }
 }

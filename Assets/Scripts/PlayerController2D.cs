@@ -1,85 +1,73 @@
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
-[RequireComponent(typeof(Rigidbody2D), typeof(BoxCollider2D))]
+[RequireComponent(typeof(Rigidbody2D))]
 public class PlayerController2D : MonoBehaviour
 {
-    [Header("Move Settings")]
-    public float walkSpeed = 3f;      // 1/s 기본 이동속도
-    public float runSpeed = 6f;       // 달리기 속도
+    [Header("이동 속도")]
+    public float walkSpeed = 3f;
+    public float runSpeed = 6f;
     private float currentSpeed;
 
-    [Header("Jump Settings")]
-    public float jumpForce = 7f;      // 점프 높이 조절
+    [Header("점프 설정")]
+    public float jumpForce = 7f;
     public float doubleJumpForce = 6f;
     private bool isGrounded = false;
     private bool canDoubleJump = false;
 
-    [Header("Ground Check")]
-    public Transform groundCheck;
-    public float groundCheckRadius = 0.1f;
-    public LayerMask groundLayer;
+    [Header("달리기 조건")]
+    public float doubleTapTime = 0.5f;
+    private float lastKeyTime = -1f;
+    private KeyCode lastKey;
+    private bool isRunning = false;
 
-    Rigidbody2D rb;
-    SpriteRenderer sr;
-    float horiz;
-    private float lastRunKeyTime = 0f;
-    private KeyCode lastRunKey = KeyCode.None;
-    private float runThreshold = 0.5f; // 0.5s 내에 누르면 달리기
+    [Header("상호작용 키")]
+    public KeyCode interactKey = KeyCode.E;
+
+    [Header("UI 연결")]
+    public GameObject inventoryPanel;
+    public GameObject mapPanel;
+    public GameObject menuPanel;
+
+    private Rigidbody2D rb;
+    private SpriteRenderer sr;
+    private float moveInput;
 
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
         sr = GetComponent<SpriteRenderer>();
         currentSpeed = walkSpeed;
-        if (groundCheck == null)
-        {
-            GameObject go = new GameObject("GroundCheck");
-            go.transform.parent = transform;
-            go.transform.localPosition = new Vector3(0, -0.5f, 0);
-            groundCheck = go.transform;
-        }
+
+        // UI 비활성화
+        if (inventoryPanel != null) inventoryPanel.SetActive(false);
+        if (mapPanel != null) mapPanel.SetActive(false);
+        if (menuPanel != null) menuPanel.SetActive(false);
     }
 
     void Update()
     {
-        ReadInput();
-        HandleInventoryMapMenu();
+        HandleInput();
     }
 
     void FixedUpdate()
     {
-        CheckGround();
         Move();
     }
 
-    void ReadInput()
+    void HandleInput()
     {
-        // 좌/우 이동
-        horiz = 0f;
-        if (Input.GetKey(KeyCode.A)) horiz = -1f;
-        if (Input.GetKey(KeyCode.D)) horiz = 1f;
-
-        // 달리기 (AA / DD)
-        if (Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.D))
+        moveInput = 0f;
+        if (Input.GetKey(KeyCode.A))
         {
-            // 처음 누른 키 기억
-            lastRunKey = Input.GetKeyDown(KeyCode.A) ? KeyCode.A : KeyCode.D;
-            lastRunKeyTime = Time.time;
+            moveInput = -1f;
+            HandleRun(KeyCode.A);
         }
-        if ((Input.GetKey(KeyCode.A) && lastRunKey == KeyCode.A) || (Input.GetKey(KeyCode.D) && lastRunKey == KeyCode.D))
+        if (Input.GetKey(KeyCode.D))
         {
-            if (Time.time - lastRunKeyTime <= runThreshold && Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.D))
-            {
-                currentSpeed = runSpeed;
-            }
-            else
-            {
-                currentSpeed = walkSpeed;
-            }
-        }
-        else
-        {
-            currentSpeed = walkSpeed;
+            moveInput = 1f;
+            HandleRun(KeyCode.D);
         }
 
         // 점프 / 더블점프
@@ -87,96 +75,114 @@ public class PlayerController2D : MonoBehaviour
         {
             if (isGrounded)
             {
-                rb.velocity = new Vector2(rb.velocity.x, 0f);
-                rb.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
+                Jump(jumpForce);
                 canDoubleJump = true;
             }
             else if (canDoubleJump)
             {
-                rb.velocity = new Vector2(rb.velocity.x, 0f);
-                rb.AddForce(Vector2.up * doubleJumpForce, ForceMode2D.Impulse);
+                Jump(doubleJumpForce);
                 canDoubleJump = false;
             }
         }
 
-        // 아래보기 (S)
-        if (Input.GetKey(KeyCode.S))
+        // 상호작용
+        if (Input.GetKeyDown(interactKey))
         {
-            // 화면 내에서 카메라나 뷰를 내려보는 처리(간단 구현은 카메라 y offset 조절)
-            Camera.main.transform.localPosition = new Vector3(Camera.main.transform.localPosition.x, -0.5f, Camera.main.transform.localPosition.z);
-        }
-        else
-        {
-            Camera.main.transform.localPosition = new Vector3(Camera.main.transform.localPosition.x, 0f, Camera.main.transform.localPosition.z);
+            Interact();
         }
 
-        // 상호작용(W)
-        if (Input.GetKeyDown(KeyCode.W))
+        // 인벤토리
+        if (Input.GetKeyDown(KeyCode.I) && inventoryPanel != null)
         {
-            TryInteract();
+            inventoryPanel.SetActive(!inventoryPanel.activeSelf);
+        }
+
+        // 지도
+        if (Input.GetKeyDown(KeyCode.Tab) && mapPanel != null)
+        {
+            mapPanel.SetActive(!mapPanel.activeSelf);
+        }
+
+        // 메뉴
+        if (Input.GetKeyDown(KeyCode.Escape) && menuPanel != null)
+        {
+            menuPanel.SetActive(!menuPanel.activeSelf);
         }
     }
 
     void Move()
     {
-        Vector2 vel = rb.velocity;
-        vel.x = horiz * currentSpeed;
-        rb.velocity = vel;
+        rb.velocity = new Vector2(moveInput * currentSpeed, rb.velocity.y);
 
-        // 좌우 반전(스프라이트)
-        if (horiz < 0) sr.flipX = true;
-        if (horiz > 0) sr.flipX = false;
+        // 스프라이트 반전
+        if (moveInput < 0) sr.flipX = true;
+        if (moveInput > 0) sr.flipX = false;
     }
 
-    void CheckGround()
+    void Jump(float force)
     {
-        Collider2D col = Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundLayer);
-        isGrounded = col != null;
-        if (isGrounded) canDoubleJump = false; // 지면 닿으면 초기화
+        rb.velocity = new Vector2(rb.velocity.x, 0);
+        rb.AddForce(Vector2.up * force, ForceMode2D.Impulse);
     }
 
-    void TryInteract()
+    void HandleRun(KeyCode key)
     {
-        // 캐릭터 앞에 작은 범위로 상호작용 검사
-        Vector2 dir = sr.flipX ? Vector2.left : Vector2.right;
-        RaycastHit2D hit = Physics2D.Raycast(transform.position, dir, 1f, LayerMask.GetMask("Interactable"));
-        if (hit.collider != null)
+        if (Input.GetKeyDown(key))
         {
-            var interact = hit.collider.GetComponent<Interactable>();
-            if (interact != null) interact.OnInteract();
-        }
-    }
+            if (lastKey == key && (Time.time - lastKeyTime) <= doubleTapTime)
+            {
+                isRunning = true;
+            }
 
-    void HandleInventoryMapMenu()
-    {
-        // 인벤토리(F) - 사용자설계에 따라, 너 설계에선 I
-        if (Input.GetKeyDown(KeyCode.F) || Input.GetKeyDown(KeyCode.I))
-        {
-            UIManager.Instance.ToggleInventory();
+            lastKey = key;
+            lastKeyTime = Time.time;
         }
 
-
-
-        // 지도(TAB)
-        if (Input.GetKeyDown(KeyCode.Tab))
+        if (Input.GetKey(key))
         {
-            UIManager.Instance.ToggleMap();
+            currentSpeed = isRunning ? runSpeed : walkSpeed;
         }
 
-        // 메뉴(ESC)
-        if (Input.GetKeyDown(KeyCode.Escape))
+        if (Input.GetKeyUp(key))
         {
-            UIManager.Instance.ToggleMenu();
+            isRunning = false;
+            currentSpeed = walkSpeed;
         }
     }
 
-    // 그리기용 (디버그)
-    void OnDrawGizmosSelected()
+    void Interact()
     {
-        if (groundCheck != null)
+        // 2D용 Physics2D 오버랩 (주변 상호작용 탐지)
+        Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, 1.5f);
+        foreach (var hit in hits)
         {
-            Gizmos.color = Color.yellow;
-            Gizmos.DrawSphere(groundCheck.position, groundCheckRadius);
+            if (hit.CompareTag("Interactable"))
+            {
+                var interactable = hit.GetComponent<Interactable>();
+                if (interactable != null)
+                {
+                    interactable.OnInteract();
+                }
+            }
         }
+    }
+
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (collision.gameObject.CompareTag("Ground"))
+            isGrounded = true;
+    }
+
+    private void OnCollisionExit2D(Collision2D collision)
+    {
+        if (collision.gameObject.CompareTag("Ground"))
+            isGrounded = false;
+    }
+
+    // 디버그용 - 상호작용 반경 표시
+    private void OnDrawGizmosSelected()
+    {
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawWireSphere(transform.position, 1.5f);
     }
 }
