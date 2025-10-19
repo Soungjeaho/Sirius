@@ -2,30 +2,54 @@ using UnityEngine;
 
 public class AxeHuman : BaseMonster
 {
-    [Header("도끼 주민 전용 설정")]
-    public float attackMoveDistance = 1f;
-    public float knockbackDelay = 0.5f;
+    [Header("AI")]
+    public float detectedRange = 3f;
+    public float stopDistance = 1f;
+
+
+    [Header("공격 관련")]
+    public Transform attackPoint;
+    public float attackRadius = 0.5f;
+    public LayerMask playerLayer;
     public Animator animator;
 
-    private bool isAttacking = false;
+    protected override void MoveTowardsPlayer()
+    {
+        if (player == null) return;
+
+        float distance = Vector2.Distance(transform.position, player.position);
+
+        if(distance <= stopDistance)
+        {
+            animator.SetBool("IsMoving", false);
+            return;
+        }
+
+        Vector2 dir = (player.position - transform.position).normalized;
+        rb.MovePosition(rb.position + dir * moveSpeed * Time.deltaTime);
+
+        animator.SetBool("IsMoving", true); 
+    }
 
     protected override void Attack()
     {
-        if (isAttacking) return;
-        StartCoroutine(AttackRoutine());
+        if (animator != null)
+            animator.SetTrigger("Attack");
+
+        Collider2D hit = Physics2D.OverlapCircle(attackPoint.position, attackRadius, playerLayer);
+        if (hit != null)
+        {
+            Debug.Log("AxeHuman이 플레이어 공격!");
+            // PlayerController2D 같은 데에 데미지 전달 코드 넣기
+        }
     }
 
-    private System.Collections.IEnumerator AttackRoutine()
+    private void OnDrawGizmosSelected()
     {
-        isAttacking = true;
-        animator.SetTrigger("Attack");
-        Debug.Log("도끼 주민이 공격합니다!");
-
-        // 플레이어 방향으로 약간 돌진
-        Vector2 dir = (player.position - transform.position).normalized;
-        rb.AddForce(dir * attackMoveDistance, ForceMode2D.Impulse);
-
-        yield return new WaitForSeconds(knockbackDelay);
-        isAttacking = false;
+        if (attackPoint != null)
+        {
+            Gizmos.color = Color.red;
+            Gizmos.DrawWireSphere(attackPoint.position, attackRadius);
+        }
     }
 }

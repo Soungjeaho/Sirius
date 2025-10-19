@@ -1,50 +1,107 @@
 using UnityEngine;
 
+[RequireComponent(typeof(Rigidbody2D))]
 public class AxeHumanController : MonoBehaviour
 {
-    public Transform player;
+    [Header("기본 스탯")]
+    public int maxHP = 2;
+    private int currentHP;
+
     public float moveSpeed = 2f;
-    public float stopDistance = 1f; // Player와 멈출 거리
+    public int contactDamage = 1;
+
+    [Header("전투")]
+    public float detectRange = 5f;
+    public float attackRange = 1f;
+    public float attackDelay = 2f;
+    public int attackDamage = 1;
+
+    [Header("Animator")]
     public Animator animator;
 
+    private Transform player;
     private Rigidbody2D rb;
+    private float lastAttackTime = 0f;
+    private bool isDead = false;
 
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
+        currentHP = maxHP;
+        player = GameObject.FindGameObjectWithTag("Player")?.transform;
     }
 
     void Update()
     {
-        FollowPlayer();
-    }
+        if (isDead || player == null) return;
 
-    void FollowPlayer()
-    {
-        if (player == null) return;
+        float distance = Vector2.Distance(transform.position, player.position);
 
-        // Player와 x축 거리만 계산
-        float distanceX = Mathf.Abs(player.position.x - transform.position.x);
-
-        if (distanceX > stopDistance)
+        if (distance <= detectRange)
         {
-            // 이동
-            float dirX = player.position.x > transform.position.x ? 1 : -1;
-            rb.velocity = new Vector2(dirX * moveSpeed, rb.velocity.y);
-            animator.SetBool("IsMoving", true);
-
-            // 스프라이트 좌우 반전
-            if (dirX < 0) GetComponent<SpriteRenderer>().flipX = true;
-            else GetComponent<SpriteRenderer>().flipX = false;
+            MoveTowardsPlayer(distance);
+            TryAttack(distance);
         }
         else
         {
-            // Player 가까이 도달 → 멈춤
-            rb.velocity = new Vector2(0, rb.velocity.y);
-            animator.SetBool("IsMoving", false);
-
-            // 공격
-            animator.SetTrigger("Attack");
+            SetMovingAnimation(false);
         }
+    }
+
+    void MoveTowardsPlayer(float distance)
+    {
+        // 공격 범위 밖이면 이동
+        if (distance > attackRange)
+        {
+            Vector2 dir = (player.position - transform.position).normalized;
+            rb.MovePosition(rb.position + dir * moveSpeed * Time.deltaTime);
+            SetMovingAnimation(true);
+        }
+        else
+        {
+            SetMovingAnimation(false);
+        }
+    }
+
+    void TryAttack(float distance)
+    {
+        if (Time.time - lastAttackTime < attackDelay) return;
+
+        if (distance <= attackRange)
+        {
+            Attack();
+            lastAttackTime = Time.time;
+        }
+    }
+
+    void Attack()
+    {
+        if (animator != null)
+            animator.SetTrigger("Attack");
+        Debug.Log($"{gameObject.name} 공격!");
+    }
+
+    public void TakeDamage(int damage)
+    {
+        if (isDead) return;
+
+        currentHP -= damage;
+        if (currentHP <= 0)
+        {
+            Die();
+        }
+    }
+
+    void Die()
+    {
+        isDead = true;
+        Debug.Log($"{gameObject.name} 쓰러짐!");
+        Destroy(gameObject, 0.5f);
+    }
+
+    void SetMovingAnimation(bool moving)
+    {
+        if (animator != null)
+            animator.SetBool("IsMoving", moving);
     }
 }
