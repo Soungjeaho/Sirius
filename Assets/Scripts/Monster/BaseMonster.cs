@@ -37,7 +37,7 @@ public abstract class BaseMonster : MonoBehaviour
 
    
 
-    protected virtual void Update()
+    protected virtual void FixedUpdate()
     {
         if (isDead || player == null) return;
 

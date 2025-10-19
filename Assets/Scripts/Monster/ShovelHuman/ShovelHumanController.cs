@@ -3,82 +3,50 @@ using UnityEngine;
 [RequireComponent(typeof(Rigidbody2D))]
 public class ShovelHumanController : BaseMonster
 {
+    [Header("Animator")]
+    public Animator animator;
+
     [Header("투사체")]
     public GameObject projectilePrefab;
     public Transform throwPoint;
     public float projectileSpeed = 5f;
 
-    [Header("Animator")]
-    public Animator animator;
-
-    protected override void Attack()
-    {
-        if (player == null) return;
-
-        float distance = Vector2.Distance(transform.position, player.position);
-
-        if (distance <= attackRange)
-        {
-            MeleeAttack();
-        }
-        else if (distance <= detectRange)
-        {
-            ThrowProjectile();
-        }
-    }
     protected override void MoveTowardsPlayer()
     {
-        if (player == null) return;
-
         float distance = Vector2.Distance(transform.position, player.position);
 
-        if (distance <= detectRange && distance > attackRange)
+        // 공격 범위 밖이면 이동
+        if (distance > attackRange)
         {
-            Vector2 dir = (player.position - transform.position).normalized;
+            Vector2 dir = new Vector2(player.position.x - transform.position.x, 0).normalized;
             rb.MovePosition(rb.position + dir * moveSpeed * Time.deltaTime);
-            animator.SetBool("IsMoving", true);
+
+            if (animator != null) animator.SetBool("IsMoving", true);
         }
         else
         {
-            animator.SetBool("IsMoving", false);
+            if (animator != null) animator.SetBool("IsMoving", false);
         }
     }
 
-    protected override void TryAttack(float distance)
+    protected override void Attack()
     {
-        if (Time.time - lastAttackTime < attackDelay) return;
+        float distance = Vector2.Distance(transform.position, player.position);
 
         if (distance <= attackRange)
         {
-            MeleeAttack();
-            lastAttackTime = Time.time;
+            // 근접 공격
+            if (animator != null) animator.SetTrigger("Attack");
+            Debug.Log($"{gameObject.name} 근접 공격!");
         }
         else if (distance <= detectRange)
         {
+            // 투사체 공격
             ThrowProjectile();
-            lastAttackTime = Time.time;
         }
     }
 
-    protected override void Update()
-    {
-        if( isDead || player == null) return;
-
-        float distance = Vector2.Distance(transform.position, player.position);
-
-        MoveTowardsPlayer();
-
-        if(Time.time - lastAttackTime > attackDelay)
-            Attack();
-    }
-
-    void MeleeAttack()
-    {
-        animator.SetTrigger("Attack");
-        Debug.Log($"{gameObject.name} 근접 공격!");
-    }
-
-    void ThrowProjectile()
+    private void ThrowProjectile()
     {
         if (projectilePrefab == null || throwPoint == null) return;
 
@@ -86,8 +54,8 @@ public class ShovelHumanController : BaseMonster
         Rigidbody2D rbProj = proj.GetComponent<Rigidbody2D>();
         if (rbProj != null)
         {
-            Vector2 direction = (player.position - throwPoint.position).normalized;
-            rbProj.velocity = direction * projectileSpeed;  // Rigidbody2D에서 velocity 사용
+            Vector2 dir = new Vector2(player.position.x - throwPoint.position.x, player.position.y - throwPoint.position.y).normalized;
+            rbProj.velocity = dir * projectileSpeed;
         }
 
         Debug.Log($"{gameObject.name} 투사체 발사!");
