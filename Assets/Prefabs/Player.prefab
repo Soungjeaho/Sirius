@@ -75,7 +75,8 @@ GameObject:
   - component: {fileID: 8921345541847859367}
   - component: {fileID: 946808286590174240}
   - component: {fileID: 4952916496549180679}
-  - component: {fileID: 5343494620439432939}
+  - component: {fileID: -6784362706647379260}
+  - component: {fileID: 6897985528407505374}
   - component: {fileID: 8088466338586887685}
   - component: {fileID: 4377437934842326641}
   m_Layer: 0
@@ -241,13 +242,12 @@ MonoBehaviour:
   walkSpeed: 5
   jumpForce: 10
   groundCheckPoint: {fileID: 9198334006761213608}
-  groundCheckX: 0.5
-  groundCheckY: 0.2
+  groundCheckRadius: 0.2
   whatIsGround:
     serializedVersion: 2
     m_Bits: 8
-  reelback: {fileID: 5343494620439432939}
---- !u!114 &5343494620439432939
+  reelback: {fileID: -6784362706647379260}
+--- !u!114 &-6784362706647379260
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -256,16 +256,34 @@ MonoBehaviour:
   m_GameObject: {fileID: 7220545932785041715}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 33958a8b6db46b248a60a315d1b89ecc, type: 3}
+  m_Script: {fileID: 11500000, guid: b3179e86c5ad37d4c98e5923776c1694, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  firePoint: {fileID: 5880627535434529667}
+  HookPrefab: {fileID: 7573530713224063984, guid: ad6aea8c0a5b2d84ca95a59319d10297, type: 3}
+  playerSprite: {fileID: 6526389199545480414}
+  maxDistance: 10
+  hookSpeed: 20
+  FirePoint: {fileID: 5680364525248094663}
   lr: {fileID: 8088466338586887685}
-  ReelbackSpeed: 150
-  maxReelDistance: 8
-  grappleLayer:
-    serializedVersion: 2
-    m_Bits: 64
+  rb: {fileID: 8921345541847859367}
+  isEnemyBeingGrappled: 0
+--- !u!114 &6897985528407505374
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7220545932785041715}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a57aa4a016dff0847855ff420a59e2e8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  reelback: {fileID: -6784362706647379260}
+  gauge: {fileID: 5487413640080229822, guid: 23ade02a0105fcb4999878e1cba45929, type: 3}
+  grappleSpeed: 5
+  disappearDelay: 0.5
+  gaugeCost: 4
 --- !u!120 &8088466338586887685
 LineRenderer:
   serializedVersion: 2

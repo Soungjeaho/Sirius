@@ -8,6 +8,8 @@ TagManager:
   - Reelbackable
   - Enemy
   - RB_Wall
+  - Wall
+  - Obstacle
   layers:
   - Default
   - TransparentFX

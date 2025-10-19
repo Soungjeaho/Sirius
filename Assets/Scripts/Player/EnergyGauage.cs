@@ -1,5 +1,7 @@
+using System.Diagnostics;
 using UnityEngine;
 using UnityEngine.UI;
+using Debug = UnityEngine.Debug;
 
 public class EnergyGauge : MonoBehaviour
 {
@@ -13,6 +15,9 @@ public class EnergyGauge : MonoBehaviour
     private void Start()
     {
         gaugeUI.UpdateUI(currentGauge, maxGauge);
+        Debug.Log("1번: Gauge + 1");
+        Debug.Log("2번: Gauge - 1");
+        Debug.Log("3번: Gauge 풀 충전");
     }
 
     private void Update()
@@ -58,7 +63,7 @@ public class EnergyGauge : MonoBehaviour
         }
         else if (Input.GetKeyDown(KeyCode.Alpha2))
         {
-            UseGauge(3);
+            UseGauge(1);
         }
         else if (Input.GetKeyDown(KeyCode.Alpha3))
         {
