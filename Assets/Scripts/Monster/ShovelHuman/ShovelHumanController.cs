@@ -31,19 +31,9 @@ public class ShovelHumanController : BaseMonster
 
     protected override void Attack()
     {
-        float distance = Vector2.Distance(transform.position, player.position);
-
-        if (distance <= attackRange)
-        {
-            // 근접 공격
-            if (animator != null) animator.SetTrigger("Attack");
-            Debug.Log($"{gameObject.name} 근접 공격!");
-        }
-        else if (distance <= detectRange)
-        {
-            // 투사체 공격
-            ThrowProjectile();
-        }
+        animator.SetTrigger("Attack");
+        ThrowProjectile();
+        Debug.Log($"{gameObject.name} 투사체 공격!");
     }
 
     private void ThrowProjectile()
@@ -54,10 +44,8 @@ public class ShovelHumanController : BaseMonster
         Rigidbody2D rbProj = proj.GetComponent<Rigidbody2D>();
         if (rbProj != null)
         {
-            Vector2 dir = new Vector2(player.position.x - throwPoint.position.x, player.position.y - throwPoint.position.y).normalized;
+            Vector2 dir = (player.position - throwPoint.position).normalized;
             rbProj.velocity = dir * projectileSpeed;
         }
-
-        Debug.Log($"{gameObject.name} 투사체 발사!");
     }
 }

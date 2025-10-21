@@ -11,9 +11,9 @@ public abstract class BaseMonster : MonoBehaviour
     public int contactDamage = 1;
 
     [Header("전투")]
-    public float detectRange = 5f;   // 플레이어 감지 거리
-    public float attackRange = 1f;   // 공격 사거리
-    public float attackDelay = 2f;   // 공격 쿨타임
+    public float detectRange = 5f;
+    public float attackRange = 1f;
+    public float attackDelay = 2f;
     public int attackDamage = 1;
 
     [Header("지면 체크")]
@@ -26,8 +26,6 @@ public abstract class BaseMonster : MonoBehaviour
     protected bool isDead = false;
     protected float lastAttackTime = 0f;
 
-    
-
     protected virtual void Start()
     {
         rb = GetComponent<Rigidbody2D>();
@@ -35,9 +33,7 @@ public abstract class BaseMonster : MonoBehaviour
         player = GameObject.FindGameObjectWithTag("Player")?.transform;
     }
 
-   
-
-    protected virtual void FixedUpdate()
+    protected virtual void Update()
     {
         if (isDead || player == null) return;
 
@@ -50,7 +46,7 @@ public abstract class BaseMonster : MonoBehaviour
         // 너무 멀면 비활성 (성능 절약)
         if (distance > detectRange * 1.5f) return;
 
-        // 땅에 있을 때만 이동 + 공격 시도
+        // 이동/공격
         if (distance < detectRange && isGrounded)
         {
             MoveTowardsPlayer();
@@ -58,24 +54,17 @@ public abstract class BaseMonster : MonoBehaviour
         }
     }
 
-    
-
     protected virtual void MoveTowardsPlayer()
     {
-
-        
-        // 공격 사거리보다 멀 때만 이동
         float distance = Vector2.Distance(transform.position, player.position);
         if (distance <= attackRange * 0.9f) return;
 
         float step = moveSpeed * Time.deltaTime;
-        Vector2 dir = (player.position - transform.position).normalized;
+        Vector2 dir = new Vector2(player.position.x - transform.position.x, 0).normalized;
 
-        // 좌우 방향 전환 (Sprite 방향 전환용)
+        // Sprite 좌우 전환
         if (dir.x != 0)
-        {
             transform.localScale = new Vector3(Mathf.Sign(dir.x), 1, 1);
-        }
 
         rb.MovePosition(rb.position + dir * step);
     }
@@ -105,11 +94,31 @@ public abstract class BaseMonster : MonoBehaviour
     protected virtual void Die()
     {
         isDead = true;
-        Debug.Log($"{gameObject.name}이(가) 쓰러졌습니다.");
+        Debug.Log($"{gameObject.name} 쓰러짐!");
         Destroy(gameObject, 0.5f);
     }
 
-    // 에디터에서 GroundCheck 위치 확인용 (Scene 뷰에 원 그리기)
+    // ----------------------
+    // Player 공격 판정 추가
+    // ----------------------
+    private void OnTriggerEnter2D(Collider2D col)
+    {
+        if (col.CompareTag("PlayerAttack"))
+        {
+            TakeDamage(1);
+            Debug.Log($"{gameObject.name} Player 공격 피격!");
+        }
+    }
+
+    private void OnTriggerStay2D(Collider2D col)
+    {
+        if (col.CompareTag("PlayerAttack"))
+        {
+            TakeDamage(1);
+        }
+    }
+
+    // 에디터용 GroundCheck 표시
     private void OnDrawGizmosSelected()
     {
         if (groundCheck != null)

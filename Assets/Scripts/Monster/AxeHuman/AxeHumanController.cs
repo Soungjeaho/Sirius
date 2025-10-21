@@ -6,6 +6,12 @@ public class AxeHumanController : BaseMonster
     [Header("Animator")]
     public Animator animator;
 
+    protected override void Attack()
+    {
+        animator.SetTrigger("Attack");
+        Debug.Log($"{gameObject.name} 근접 공격!");
+    }
+
     protected override void MoveTowardsPlayer()
     {
         float distance = Vector2.Distance(transform.position, player.position);
@@ -24,9 +30,5 @@ public class AxeHumanController : BaseMonster
         }
     }
 
-    protected override void Attack()
-    {
-        if (animator != null) animator.SetTrigger("Attack");
-        Debug.Log($"{gameObject.name} 근접 공격!");
-    }
+   
 }
