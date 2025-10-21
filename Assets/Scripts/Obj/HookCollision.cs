@@ -18,6 +18,7 @@ public class HookCollision : MonoBehaviour
         if (collision.CompareTag("Enemy"))
         {
             reelback.OnHookHit(collision.tag, hitPos);
+            collision.isTrigger = true;
         }
         else if (collision.CompareTag("Reelbackable"))
         {

@@ -1,6 +1,4 @@
 using System.Collections;
-using System.Collections.Generic;
-using System.IO.Pipes;
 using UnityEngine;
 
 public class NewReelback : MonoBehaviour
@@ -14,9 +12,7 @@ public class NewReelback : MonoBehaviour
     [SerializeField] Rigidbody2D rb = null;
     [HideInInspector] public bool isEnemyBeingGrappled = false;
 
-    private Vector3 firePointOffset;
     private Vector2 FireDirection;
-
     Camera m_cam = null;
     bool facingRight = true;
     GameObject currentHook = null;
@@ -34,7 +30,6 @@ public class NewReelback : MonoBehaviour
     private void Start()
     {
         m_cam = Camera.main;
-        firePointOffset = FirePoint.localPosition; // 초기 offset 저장
 
         if (FirePoint == null)
             Debug.LogError("FirePoint가 할당되지 않았습니다!");
@@ -46,10 +41,9 @@ public class NewReelback : MonoBehaviour
             lr.positionCount = 2;
 
         if (rb != null)
-            rb.constraints = RigidbodyConstraints2D.FreezeRotation; // Z회전 고정
+            rb.constraints = RigidbodyConstraints2D.FreezeRotation;
     }
 
-    // LookAtMouse() 수정
     private void LookAtMouse()
     {
         Vector2 mousePos = m_cam.ScreenToWorldPoint(Input.mousePosition);
@@ -59,37 +53,41 @@ public class NewReelback : MonoBehaviour
         else if (mousePos.x > transform.position.x && !facingRight)
             Flip();
 
-        // FirePoint 회전하지 않고 방향 벡터만 계산
-        Vector2 direction = (mousePos - (Vector2)FirePoint.position).normalized;
-        FireDirection = direction; // 새로 변수로 저장
+        FireDirection = (mousePos - (Vector2)FirePoint.position).normalized;
     }
+
     private void Flip()
     {
         facingRight = !facingRight;
-
-        // 위치는 건드리지 않고, Sprite만 Y축 회전
         Vector3 scale = playerSprite.transform.localScale;
-        scale.y *= -1; // Y축 반전
+        scale.y *= -1;
         playerSprite.transform.localScale = scale;
     }
-
 
     private void TryFire()
     {
         if (Input.GetMouseButtonDown(1) && currentHook == null)
         {
             currentHook = Instantiate(HookPrefab, FirePoint.position, Quaternion.identity);
-            Rigidbody2D rb = currentHook.GetComponent<Rigidbody2D>();
-            if (rb != null)
+            Rigidbody2D hookRb = currentHook.GetComponent<Rigidbody2D>();
+            if (hookRb != null)
             {
-                rb.velocity = FireDirection * hookSpeed;
-                rb.constraints = RigidbodyConstraints2D.FreezeRotation; // Hook 회전 고정
+                hookRb.velocity = FireDirection * hookSpeed;
+                hookRb.constraints = RigidbodyConstraints2D.FreezeRotation;
             }
 
             HookCollision hookCol = currentHook.AddComponent<HookCollision>();
             hookCol.Init(this);
+
+            // 발사 직후 LR 활성화
+            if (lr != null)
+            {
+                lr.enabled = true;
+                lr.positionCount = 2;
+            }
         }
     }
+
     public void OnHookHit(string tag, Vector2 hitPos)
     {
         hookTriggered = true;
@@ -109,9 +107,6 @@ public class NewReelback : MonoBehaviour
         else if (tag == "Reelbackable")
         {
             pullTarget = GameObject.FindWithTag("Reelbackable");
-            lr.enabled = true;
-            lr.SetPosition(0, FirePoint.position);
-            lr.SetPosition(1, hitPos);
         }
         else if (tag == "Enemy")
         {
@@ -122,12 +117,6 @@ public class NewReelback : MonoBehaviour
                 hookTriggered = false;
                 eg.StartGrapple(GameObject.FindWithTag("Enemy"));
             }
-        }
-        else
-        {
-            lr.enabled = true;
-            lr.SetPosition(0, FirePoint.position);
-            lr.SetPosition(1, hitPos);
         }
     }
 
@@ -151,9 +140,12 @@ public class NewReelback : MonoBehaviour
             elapsed += Time.deltaTime;
             player.transform.position = Vector2.Lerp(startPos, targetPos, elapsed / duration);
 
-            lr.enabled = true;
-            lr.SetPosition(0, FirePoint.position);
-            lr.SetPosition(1, hitPos);
+            if (lr != null)
+            {
+                lr.positionCount = 2;
+                lr.SetPosition(0, FirePoint.position);
+                lr.SetPosition(1, hitPos);
+            }
 
             yield return null;
         }
@@ -163,8 +155,12 @@ public class NewReelback : MonoBehaviour
         playerRb.gravityScale = 0f;
         IsGrappling = true;
 
-        lr.SetPosition(0, FirePoint.position);
-        lr.SetPosition(1, hitPos);
+        if (lr != null)
+        {
+            lr.positionCount = 2;
+            lr.SetPosition(0, FirePoint.position);
+            lr.SetPosition(1, hitPos);
+        }
 
         yield return new WaitForSeconds(2f);
         StopGrapple();
@@ -187,51 +183,43 @@ public class NewReelback : MonoBehaviour
 
         IsGrappling = false;
         hookTriggered = false;
-        lr.enabled = false;
+
+        if (lr != null)
+        {
+            lr.enabled = false;
+            lr.positionCount = 0;
+        }
     }
 
     private void UpdateLine()
     {
-        if (isEnemyBeingGrappled) return;
+        if (currentHook != null) // Hook이 존재하면 항상 LR 따라가기
+        {
+            if (lr != null)
+            {
+                lr.positionCount = 2;
+                lr.SetPosition(0, FirePoint.position);
+                lr.SetPosition(1, currentHook.transform.position);
+            }
+            return;
+        }
 
         if (hookTriggered)
         {
-            float distance = Vector2.Distance(FirePoint.position, fixedHookPosition);
-
-            if (distance > maxDistance)
+            if (lr != null)
             {
-                hookTriggered = false;
-                lr.enabled = false;
-                lr.positionCount = 0;
-                return;
+                lr.positionCount = 2;
+                lr.SetPosition(0, FirePoint.position);
+                lr.SetPosition(1, fixedHookPosition);
             }
-
-            lr.enabled = true;
-            lr.positionCount = 2;
-            lr.SetPosition(0, FirePoint.position);
-            lr.SetPosition(1, fixedHookPosition);
-        }
-        else if (currentHook != null)
-        {
-            float distance = Vector2.Distance(FirePoint.position, currentHook.transform.position);
-            if (distance > maxDistance)
-            {
-                Destroy(currentHook);
-                currentHook = null;
-                lr.enabled = false;
-                lr.positionCount = 0;
-                return;
-            }
-
-            lr.enabled = true;
-            lr.positionCount = 2;
-            lr.SetPosition(0, FirePoint.position);
-            lr.SetPosition(1, currentHook.transform.position);
         }
         else
         {
-            lr.enabled = false;
-            lr.positionCount = 0;
+            if (lr != null)
+            {
+                lr.enabled = false;
+                lr.positionCount = 0;
+            }
         }
     }
 
@@ -243,7 +231,6 @@ public class NewReelback : MonoBehaviour
             {
                 isPullingObject = true;
                 hookTriggered = false;
-                lr.enabled = false;
 
                 Vector2 playerPos = FirePoint.position;
                 Vector2 objPos = pullTarget.transform.position;
@@ -264,7 +251,12 @@ public class NewReelback : MonoBehaviour
 
         isPullingObject = false;
         pullTarget = null;
-        lr.enabled = false;
+
+        if (lr != null)
+        {
+            lr.enabled = false;
+            lr.positionCount = 0;
+        }
     }
 
     private void Update()

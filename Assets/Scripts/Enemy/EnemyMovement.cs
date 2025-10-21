@@ -1,11 +1,8 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-[RequireComponent(typeof(Rigidbody2D))]
+[RequireComponent(typeof(Rigidbody2D), typeof(BoxCollider2D))]
 public class EnemyMovement : MonoBehaviour
 {
-    [Header("Movement Settings")]
     public float moveSpeed = 3f;
     public bool moveRight = true;
 
@@ -28,9 +25,20 @@ public class EnemyMovement : MonoBehaviour
         rb.velocity = velocity;
     }
 
-    private void OnTriggerEnter2D(Collider2D collision)
+    private void OnCollisionEnter2D(Collision2D collision)
     {
-        if (collision.CompareTag("Ground") || collision.CompareTag("Reelbackable"))
-            moveRight = !moveRight;
+        if (collision.collider.CompareTag("RB_Wall") || collision.collider.CompareTag("Ground") || collision.collider.CompareTag("Wall"))
+        {
+            Flip();
+        }
+    }
+
+
+    private void Flip()
+    {
+        moveRight = !moveRight;
+        Vector3 localScale = transform.localScale;
+        localScale.x *= -1f;
+        transform.localScale = localScale;
     }
 }
