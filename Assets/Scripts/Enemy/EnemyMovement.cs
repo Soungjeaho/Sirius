@@ -27,7 +27,11 @@ public class EnemyMovement : MonoBehaviour
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        if (collision.collider.CompareTag("RB_Wall") || collision.collider.CompareTag("Ground") || collision.collider.CompareTag("Wall"))
+        if (collision.collider.CompareTag("RB_Wall") 
+         || collision.collider.CompareTag("Ground") 
+         || collision.collider.CompareTag("Wall") 
+         || collision.collider.CompareTag("Reelbackable") 
+         || collision.collider.CompareTag("Obstacle"))
         {
             Flip();
         }
