@@ -16,19 +16,24 @@ public abstract class BaseMonster : MonoBehaviour
     public float attackDelay = 2f;
     public int attackDamage = 1;
 
-    [Header("지면 체크")]
-    [SerializeField] private Transform groundCheck;
-    [SerializeField] private LayerMask groundLayer;
-    protected bool isGrounded = false;
+    [Header("지면 체크 (선택사항)")]
+    [SerializeField] protected Transform groundCheck;
+    [SerializeField] protected LayerMask groundLayer;
+    protected bool isGrounded = true;
 
     protected Transform player;
     protected Rigidbody2D rb;
+    protected Animator anim;
     protected bool isDead = false;
     protected float lastAttackTime = 0f;
 
+    // ----------------------
+    // 초기화
+    // ----------------------
     protected virtual void Start()
     {
         rb = GetComponent<Rigidbody2D>();
+        anim = GetComponent<Animator>();
         currentHP = maxHP;
         player = GameObject.FindGameObjectWithTag("Player")?.transform;
     }
@@ -37,16 +42,12 @@ public abstract class BaseMonster : MonoBehaviour
     {
         if (isDead || player == null) return;
 
-        // 땅 감지
-        isGrounded = Physics2D.OverlapCircle(groundCheck.position, 0.1f, groundLayer);
+        if (groundCheck != null)
+            isGrounded = Physics2D.OverlapCircle(groundCheck.position, 0.1f, groundLayer);
 
-        // 플레이어 거리 계산
         float distance = Vector2.Distance(transform.position, player.position);
+        if (distance > detectRange * 1.5f) return; // 너무 멀면 비활성
 
-        // 너무 멀면 비활성 (성능 절약)
-        if (distance > detectRange * 1.5f) return;
-
-        // 이동/공격
         if (distance < detectRange && isGrounded)
         {
             MoveTowardsPlayer();
@@ -54,59 +55,80 @@ public abstract class BaseMonster : MonoBehaviour
         }
     }
 
+    // ----------------------
+    // 이동 로직
+    // ----------------------
     protected virtual void MoveTowardsPlayer()
     {
         float distance = Vector2.Distance(transform.position, player.position);
-        if (distance <= attackRange * 0.9f) return;
+        if (distance <= attackRange * 0.9f)
+        {
+            anim?.SetBool("isMoving", false);
+            return;
+        }
 
-        float step = moveSpeed * Time.deltaTime;
         Vector2 dir = new Vector2(player.position.x - transform.position.x, 0).normalized;
+        rb.MovePosition(rb.position + dir * moveSpeed * Time.deltaTime);
 
-        // Sprite 좌우 전환
         if (dir.x != 0)
             transform.localScale = new Vector3(Mathf.Sign(dir.x), 1, 1);
 
-        rb.MovePosition(rb.position + dir * step);
+        anim?.SetBool("isMoving", true);
     }
 
+    // ----------------------
+    // 공격 시도
+    // ----------------------
     protected virtual void TryAttack(float distance)
     {
-        if (distance <= attackRange && Time.time - lastAttackTime > attackDelay)
+        if (Time.time - lastAttackTime < attackDelay) return;
+
+        if (distance <= attackRange)
         {
-            Attack();
             lastAttackTime = Time.time;
+            Attack();
         }
     }
 
+    // ----------------------
+    // 자식에서 구현 (공격 패턴)
+    // ----------------------
     protected abstract void Attack();
 
+    // ----------------------
+    // 피격 / 사망
+    // ----------------------
     public virtual void TakeDamage(int damage)
     {
         if (isDead) return;
 
         currentHP -= damage;
+        Debug.Log($"{name} 피격! 남은 HP: {currentHP}");
+        anim?.SetTrigger("Hit");
+
         if (currentHP <= 0)
-        {
             Die();
-        }
     }
 
     protected virtual void Die()
     {
+        if (isDead) return;
         isDead = true;
-        Debug.Log($"{gameObject.name} 쓰러짐!");
-        Destroy(gameObject, 0.5f);
+        Debug.Log($"{name} 사망");
+        anim?.SetTrigger("Die");
+        rb.velocity = Vector2.zero;
+        Destroy(gameObject, 1f);
     }
 
     // ----------------------
-    // Player 공격 판정 추가
+    // Player 공격 판정
     // ----------------------
     private void OnTriggerEnter2D(Collider2D col)
     {
         if (col.CompareTag("PlayerAttack"))
         {
             TakeDamage(1);
-            Debug.Log($"{gameObject.name} Player 공격 피격!");
+            Debug.Log($"{name} Player 공격 피격!");
         }
     }
 
@@ -118,7 +140,9 @@ public abstract class BaseMonster : MonoBehaviour
         }
     }
 
-    // 에디터용 GroundCheck 표시
+    // ----------------------
+    // 에디터 시각화
+    // ----------------------
     private void OnDrawGizmosSelected()
     {
         if (groundCheck != null)
