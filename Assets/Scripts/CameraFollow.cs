@@ -2,24 +2,24 @@ using UnityEngine;
 
 public class CameraFollow2D : MonoBehaviour
 {
-    [Header("ÃßÀû ´ë»ó")]
+    [Header("ì¶”ì  ëŒ€ìƒ")]
     public Transform target;
 
-    [Header("Ä«¸Ş¶ó ¿ÀÇÁ¼Â")]
+    [Header("ì¹´ë©”ë¼ ì˜¤í”„ì…‹")]
     public Vector3 offset = new Vector3(0, 0, -10f);
 
-    [Header("ºÎµå·¯¿î ÃßÀû ¼Óµµ")]
+    [Header("ë¶€ë“œëŸ¬ìš´ ì¶”ì  ì†ë„")]
     public float smoothSpeed = 5f;
 
     private void LateUpdate()
     {
         if (target == null) return;
 
-        // ¸ñÇ¥ À§Ä¡ °è»ê (Z´Â °íÁ¤)
+        
         Vector3 desired = target.position + offset;
         Vector3 smoothed = Vector3.Lerp(transform.position, desired, Time.deltaTime * smoothSpeed);
 
-        // 2D¶ó¼­ ZÃàÀº °íÁ¤ À¯Áö
+        
         transform.position = new Vector3(smoothed.x, smoothed.y, offset.z);
     }
 }

@@ -12,7 +12,7 @@ public class SavePoint : MonoBehaviour
             if (player != null)
             {
                 SaveLoadManager.Instance.SavePlayer(player, slot);
-                Debug.Log($"¼¼ÀÌºê Æ÷ÀÎÆ®({slot})¿¡¼­ ÀúÀå ¿Ï·á!");
+                Debug.Log($"ì„¸ì´ë¸Œ í¬ì¸íŠ¸({slot})ì—ì„œ ì €ì¥ ì™„ë£Œ!");
             }
         }
     }

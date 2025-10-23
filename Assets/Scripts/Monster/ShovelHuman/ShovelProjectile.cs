@@ -2,32 +2,25 @@ using UnityEngine;
 
 public class ShovelProjectile : MonoBehaviour
 {
-    [Header("Åõ»çÃ¼ ¼³Á¤")]
-    public float lifetime = 3f;      // ¸î ÃÊ µÚ »ç¶óÁúÁö
-    public int damage = 1;           // ÇÃ·¹ÀÌ¾î¿¡°Ô ÀÔÈú ÇÇÇØ·®
-    public LayerMask hitLayer;       // ¸ÂÀ» ´ë»ó (ÁÖ·Î Player)
+    [Header("íˆ¬ì‚¬ì²´ ì„¤ì •")]
+    public float lifetime = 3f;      
+    public int damage = 1;           
+    public LayerMask hitLayer;       
 
     private void Start()
     {
-        // ÀÏÁ¤ ½Ã°£ Áö³ª¸é ÀÚµ¿ »èÁ¦
+        
         Destroy(gameObject, lifetime);
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        // Player Layer¿Í Ãæµ¹ÇßÀ» ¶§¸¸ Ã³¸®
+        
         if (((1 << collision.gameObject.layer) & hitLayer) != 0)
         {
-            Debug.Log($"Åõ»çÃ¼°¡ {collision.gameObject.name}¿¡°Ô ¸íÁß!");
+            Debug.Log($"íˆ¬ì‚¬ì²´ê°€ {collision.gameObject.name}ì—ê²Œ ëª…ì¤‘!");
 
-            // PlayerController2D°¡ µ¥¹ÌÁö ¹Ş´Â ¸Ş¼­µå°¡ ÀÖÀ¸¸é È£Ãâ °¡´É (¿¹: TakeDamage)
-            // var player = collision.GetComponent<PlayerController2D>();
-            // if (player != null)
-            // {
-            //     player.TakeDamage(damage);
-            // }
-
-            Destroy(gameObject); // ¸íÁß ÈÄ Á¦°Å
+            Destroy(gameObject); 
         }
     }
 }

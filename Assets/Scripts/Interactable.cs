@@ -3,17 +3,17 @@ using UnityEngine;
 [RequireComponent(typeof(Collider2D))]
 public class Interactable : MonoBehaviour
 {
-    [Tooltip("ÇÃ·¹ÀÌ¾î°¡ Á¢±ÙÇßÀ» ¶§ Ç¥½ÃÇÒ ÅØ½ºÆ®")]
-    public string interactText = "E Å°·Î »óÈ£ÀÛ¿ë";
+    [Tooltip("í”Œë ˆì´ì–´ê°€ ì ‘ê·¼í–ˆì„ ë•Œ í‘œì‹œí•  í…ìŠ¤íŠ¸")]
+    public string interactText = "E í‚¤ë¡œ ìƒí˜¸ì‘ìš©";
 
-    // ÇÃ·¹ÀÌ¾î°¡ »óÈ£ÀÛ¿ë ½Ã È£Ãâ
+    
     public virtual void OnInteract()
     {
-        Debug.Log($"{gameObject.name}¿Í »óÈ£ÀÛ¿ëÇß½À´Ï´Ù!");
-        // ¿©±â¿¡ ¿¹: ¹® ¿­±â, NPC ´ëÈ­ ½ÃÀÛ, ¾ÆÀÌÅÛ Áİ±â µîÀÇ ·ÎÁ÷À» Ãß°¡ °¡´É
+        Debug.Log($"{gameObject.name}ì˜ ìƒí˜¸ì‘ìš©í–ˆìŠµë‹ˆë‹¤.");
+        
     }
 
-    // µğ¹ö±×¿ëÀ¸·Î »óÈ£ÀÛ¿ë ¹üÀ§ Ç¥½Ã
+    
     private void OnDrawGizmos()
     {
         Gizmos.color = Color.cyan;

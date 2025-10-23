@@ -7,7 +7,7 @@ public class AxeHuman : BaseMonster
     public float stopDistance = 1f;
 
 
-    [Header("°ø°İ °ü·Ã")]
+    [Header("ê³µê²© ê´€ë ¨")]
     public Transform attackPoint;
     public float attackRadius = 0.5f;
     public LayerMask playerLayer;
@@ -39,8 +39,8 @@ public class AxeHuman : BaseMonster
         Collider2D hit = Physics2D.OverlapCircle(attackPoint.position, attackRadius, playerLayer);
         if (hit != null)
         {
-            Debug.Log("AxeHumanÀÌ ÇÃ·¹ÀÌ¾î °ø°İ!");
-            // PlayerController2D °°Àº µ¥¿¡ µ¥¹ÌÁö Àü´Ş ÄÚµå ³Ö±â
+            Debug.Log("AxeHumanì´ í”Œë ˆì´ì–´ ê³µê²©!");
+            
         }
     }
 

@@ -25,7 +25,7 @@ public class SaveLoadManager : MonoBehaviour
         PlayerData data = new PlayerData(player);
         string json = JsonUtility.ToJson(data, true);
         File.WriteAllText(savePath + slot + ".json", json);
-        Debug.Log($"¼¼ÀÌºê ¿Ï·á (½½·Ô {slot}) - {savePath + slot}.json");
+        Debug.Log($"ì„¸ì´ë¸Œ ì™„ë£Œ (ìŠ¬ë¡¯ {slot}) - {savePath + slot}.json");
     }
 
     public void LoadPlayer(PlayerController2D player, int slot)
@@ -33,7 +33,7 @@ public class SaveLoadManager : MonoBehaviour
         string path = savePath + slot + ".json";
         if (!File.Exists(path))
         {
-            Debug.LogWarning("ÀúÀå ÆÄÀÏÀÌ ¾ø½À´Ï´Ù.");
+            Debug.LogWarning("ì €ì¥ íŒŒì¼ì´ ì—†ìŠµë‹ˆë‹¤.");
             return;
         }
 
@@ -43,7 +43,7 @@ public class SaveLoadManager : MonoBehaviour
         Vector2 loadPos = new Vector2(data.positionX, data.positionY);
         player.transform.position = loadPos;
 
-        Debug.Log($"·Îµå ¿Ï·á (½½·Ô {slot}) - À§Ä¡ º¹¿ø: {loadPos}");
+        Debug.Log($"ë¡œë“œ ì™„ë£Œ (ìŠ¬ë¡¯ {slot}) - ìœ„ì¹˜ ë³µì›: {loadPos}");
     }
 
     public bool HasSave(int slot)

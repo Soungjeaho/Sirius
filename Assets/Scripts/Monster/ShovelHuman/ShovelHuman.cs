@@ -2,10 +2,10 @@ using UnityEngine;
 
 public class ShovelHuman : BaseMonster
 {
-    [Header("¿ø°Å¸® °ø°İ ¼³Á¤")]
-    public GameObject projectilePrefab;  // ´øÁú Åõ»çÃ¼ ÇÁ¸®ÆÕ
-    public Transform throwPoint;         // ´øÁö´Â À§Ä¡
-    public float projectileSpeed = 6f;   // Åõ»çÃ¼ ¼Óµµ
+    [Header("ì›ê±°ë¦¬ ê³µê²© ì„¤ì •")]
+    public GameObject projectilePrefab;  
+    public Transform throwPoint;         
+    public float projectileSpeed = 6f;   
     public Animator animator;
 
     protected override void Attack()
@@ -15,14 +15,14 @@ public class ShovelHuman : BaseMonster
 
         if (projectilePrefab == null || throwPoint == null)
         {
-            Debug.LogWarning($"{gameObject.name}: Åõ»çÃ¼ ÇÁ¸®ÆÕ ¶Ç´Â ThrowPoint ¹ÌÁöÁ¤");
+            Debug.LogWarning($"{gameObject.name}: íˆ¬ì‚¬ì²´ í”„ë¦¬íŒ¹ ë˜ëŠ” ThrowPoint ë¯¸ì§€ì •");
             return;
         }
 
-        // ÇÃ·¹ÀÌ¾î ¹æÇâ °è»ê
+        
         Vector2 direction = (player.position - throwPoint.position).normalized;
 
-        // Åõ»çÃ¼ »ı¼º ¹× ¹ß»ç
+        
         GameObject proj = Instantiate(projectilePrefab, throwPoint.position, Quaternion.identity);
         Rigidbody2D rbProj = proj.GetComponent<Rigidbody2D>();
         if (rbProj != null)
@@ -30,15 +30,15 @@ public class ShovelHuman : BaseMonster
             rbProj.velocity = direction * projectileSpeed;
         }
 
-        Debug.Log($"{gameObject.name}ÀÌ(°¡) Åõ»çÃ¼ ¹ß»ç!");
+        Debug.Log($"{gameObject.name}ì´(ê°€) íˆ¬ì‚¬ì²´ ë°œì‚¬!");
     }
 
     protected override void MoveTowardsPlayer()
     {
-        // ShovelHumanÀº ±ÙÁ¢±îÁö °¡Áö ¾Ê°í, »ç°Å¸® ¹ÛÀÏ ¶§¸¸ ´Ù°¡°¨
+        
         float distance = Vector2.Distance(transform.position, player.position);
 
-        // »ç°Å¸®º¸´Ù ¸Ö¸é ÃµÃµÈ÷ Á¢±Ù
+        
         if (distance > attackRange * 1.2f)
         {
             float step = moveSpeed * Time.deltaTime;
@@ -49,7 +49,7 @@ public class ShovelHuman : BaseMonster
 
             rb.MovePosition(rb.position + dir * step);
         }
-        // »ç°Å¸® ¾ÈÂÊÀÌ¸é Á¦ÀÚ¸® ´ë±â (°ø°İ¸¸ ¼öÇà)
+        
     }
 
     private void OnDrawGizmosSelected()

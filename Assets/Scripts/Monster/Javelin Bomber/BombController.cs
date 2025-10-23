@@ -21,15 +21,15 @@ public class BombController : MonoBehaviour
         {
             if (hit.CompareTag("Player"))
             {
-                Debug.Log("ÇÃ·¹ÀÌ¾î ÆøÅº µ¥¹ÌÁö!");
+                Debug.Log("í”Œë ˆì´ì–´ í­íƒ„ ë°ë¯¸ì§€!");
             }
         }
 
-        // Æø¹ß ÈÄ Prefab »èÁ¦
+        
         Destroy(gameObject);
     }
 
-    // Inspector¿ë ¹üÀ§ Ç¥½Ã
+    
     void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.red;

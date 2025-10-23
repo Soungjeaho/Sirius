@@ -5,17 +5,17 @@ using UnityEngine;
 [RequireComponent(typeof(Rigidbody2D))]
 public class PlayerController2D : MonoBehaviour
 {
-    [Header("ÇÃ·¹ÀÌ¾î ½ºÅÈ")]
+    [Header("í”Œë ˆì´ì–´ ìŠ¤íƒ¯")]
     public PlayerStats stats = new PlayerStats();
 
-    [Header("»óÈ£ÀÛ¿ë Å°")]
+    [Header("ìƒí˜¸ì‘ìš© í‚¤")]
     public KeyCode interactKey = KeyCode.E;
 
-    [Header("UI ¿¬°á")]
+    [Header("UI ì—°ê²°")]
     public GameObject inventoryPanel;
     public GameObject mapPanel;
     public GameObject menuPanel;
-    public GameObject gaugePanel; // °ÔÀÌÁö UI ÆĞ³Î (ÃßÈÄ ¿¬°á)
+    public GameObject gaugePanel;
 
     private Rigidbody2D rb;
     private SpriteRenderer sr;
@@ -24,13 +24,13 @@ public class PlayerController2D : MonoBehaviour
     private bool isGrounded = false;
     private bool canDoubleJump = false;
 
-    // ´Ş¸®±â °ü·Ã
+    
     public float doubleTapTime = 0.5f;
     private float lastKeyTime = -1f;
     private KeyCode lastKey;
     private bool isRunning = false;
 
-    // °ø°İ ÄğÅ¸ÀÓ
+    
     private float lastAttackTime = 0f;
 
     void Start()
@@ -42,7 +42,7 @@ public class PlayerController2D : MonoBehaviour
         stats.currentHP = stats.maxHP;
         stats.gaugeCurrent = stats.gaugeMax;
 
-        // UI ÃÊ±âÈ­
+        
         if (inventoryPanel != null) inventoryPanel.SetActive(false);
         if (mapPanel != null) mapPanel.SetActive(false);
         if (menuPanel != null) menuPanel.SetActive(false);
@@ -59,7 +59,7 @@ public class PlayerController2D : MonoBehaviour
         Move();
     }
 
-    #region ÀÌµ¿ / Á¡ÇÁ / ´Ş¸®±â
+    #region ì´ë™ / ì í”„ / ë‹¬ë¦¬ê¸°
     void HandleInput()
     {
         moveInput = 0f;
@@ -75,7 +75,7 @@ public class PlayerController2D : MonoBehaviour
             HandleRun(KeyCode.D);
         }
 
-        // Á¡ÇÁ / ´õºíÁ¡ÇÁ
+        
         if (Input.GetKeyDown(KeyCode.Space))
         {
             if (isGrounded)
@@ -90,10 +90,10 @@ public class PlayerController2D : MonoBehaviour
             }
         }
 
-        // »óÈ£ÀÛ¿ë
+        
         if (Input.GetKeyDown(interactKey)) Interact();
 
-        // ÀÎº¥Åä¸® / Áöµµ / ¸Ş´º
+        
         if (Input.GetKeyDown(KeyCode.I) && inventoryPanel != null)
             inventoryPanel.SetActive(!inventoryPanel.activeSelf);
 
@@ -109,11 +109,11 @@ public class PlayerController2D : MonoBehaviour
         float speed = isRunning ? stats.runSpeed : stats.walkSpeed;
         rb.velocity = new Vector2(moveInput * speed, rb.velocity.y);
 
-        // ½ºÇÁ¶óÀÌÆ® ¹İÀü
+        
         if (moveInput < 0) sr.flipX = true;
         if (moveInput > 0) sr.flipX = false;
 
-        // ¾Ö´Ï¸ŞÀÌ¼Ç ÀÌµ¿ ÆÄ¶ó¹ÌÅÍ
+        
         if (anim != null) anim.SetBool("isMoving", moveInput != 0);
     }
 
@@ -139,7 +139,7 @@ public class PlayerController2D : MonoBehaviour
         }
 
         if (Input.GetKey(key))
-            ; // ¼Óµµ Àû¿ëÀº Move()¿¡¼­ Ã³¸®
+            ;
 
         if (Input.GetKeyUp(key))
         {
@@ -148,14 +148,14 @@ public class PlayerController2D : MonoBehaviour
     }
     #endregion
 
-    #region °ø°İ / °ÔÀÌÁö
+    #region ê³µê²© / ê²Œì´ì§€
     public void Attack()
     {
         if (Time.time - lastAttackTime < stats.attackDelay) return;
 
         lastAttackTime = Time.time;
 
-        // °ø°İ ¹üÀ§ ³» Àû ÆÇÁ¤
+        
         Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, stats.attackRange);
         foreach (var hit in hits)
         {
@@ -165,7 +165,7 @@ public class PlayerController2D : MonoBehaviour
                 if (enemy != null)
                 {
                     enemy.TakeDamage(stats.attackDamage);
-                    Debug.Log($"Àû ÇÇ°İ! ÇÇÇØ: {stats.attackDamage}");
+                    Debug.Log($"ì  í”¼ê²©! í”¼í•´: {stats.attackDamage}");
                 }
             }
         }
@@ -181,7 +181,7 @@ public class PlayerController2D : MonoBehaviour
 
     #endregion
 
-    #region »óÈ£ÀÛ¿ë
+    #region ìƒí˜¸ì‘ìš©
     void Interact()
     {
         Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, 1.5f);
@@ -196,7 +196,7 @@ public class PlayerController2D : MonoBehaviour
     }
     #endregion
 
-    #region Ãæµ¹
+    #region ì¶©ëŒ
     private void OnCollisionEnter2D(Collision2D collision)
     {
         if (collision.gameObject.CompareTag("Ground"))
@@ -210,12 +210,12 @@ public class PlayerController2D : MonoBehaviour
     }
     #endregion
 
-    #region µğ¹ö±×
+    #region ë””ë²„ê·¸
     private void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.yellow;
         Gizmos.DrawWireSphere(transform.position, stats.attackRange);
-        Gizmos.DrawWireSphere(transform.position, 1.5f); // »óÈ£ÀÛ¿ë ¹İ°æ
+        Gizmos.DrawWireSphere(transform.position, 1.5f); 
     }
     #endregion
 }
@@ -240,7 +240,7 @@ public class PlayerStats
     public int gaugeCurrent;
     public int gaugeRecoverOnKill = 3;
 
-    // ¼ºÀå¿ë
+    
     public void IncreaseMaxHP(int value) { maxHP += value; currentHP += value; }
     public void IncreaseGaugeMax(int value) { gaugeMax += value; gaugeCurrent += value; }
     public void DoubleAttackDamage() { attackDamage *= 2; }

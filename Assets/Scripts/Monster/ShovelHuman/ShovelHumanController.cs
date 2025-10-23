@@ -6,7 +6,7 @@ public class ShovelHumanController : BaseMonster
     [Header("Animator")]
     public Animator animator;
 
-    [Header("Åõ»çÃ¼")]
+    [Header("íˆ¬ì‚¬ì²´")]
     public GameObject projectilePrefab;
     public Transform throwPoint;
     public float projectileSpeed = 5f;
@@ -15,7 +15,7 @@ public class ShovelHumanController : BaseMonster
     {
         float distance = Vector2.Distance(transform.position, player.position);
 
-        // °ø°Ý ¹üÀ§ ¹ÛÀÌ¸é ÀÌµ¿
+        
         if (distance > attackRange)
         {
             Vector2 dir = new Vector2(player.position.x - transform.position.x, 0).normalized;
@@ -33,7 +33,7 @@ public class ShovelHumanController : BaseMonster
     {
         animator.SetTrigger("Attack");
         ThrowProjectile();
-        Debug.Log($"{gameObject.name} Åõ»çÃ¼ °ø°Ý!");
+        Debug.Log($"{gameObject.name} íˆ¬ì‚¬ì²´ ê³µê²©!");
     }
 
     private void ThrowProjectile()

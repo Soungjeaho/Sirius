@@ -9,14 +9,14 @@ public class AxeHumanController : BaseMonster
     protected override void Attack()
     {
         animator.SetTrigger("Attack");
-        Debug.Log($"{gameObject.name} ±ÙÁ¢ °ø°Ý!");
+        Debug.Log($"{gameObject.name} ê·¼ì ‘ ê³µê²©!");
     }
 
     protected override void MoveTowardsPlayer()
     {
         float distance = Vector2.Distance(transform.position, player.position);
 
-        // °ø°Ý ¹üÀ§ ¹ÛÀÌ¸é ÀÌµ¿, ¾ÈÂÊÀÌ¸é Á¤Áö
+        
         if (distance > attackRange)
         {
             Vector2 dir = new Vector2(player.position.x - transform.position.x, 0).normalized;
