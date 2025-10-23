@@ -9216,6 +9216,18 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 7675327168451010893, guid: dd70f840637664c4b918fa452814cab2, type: 3}
+      propertyPath: m_Depth
+      value: -2
+      objectReference: {fileID: 0}
+    - target: {fileID: 7675327168451010893, guid: dd70f840637664c4b918fa452814cab2, type: 3}
+      propertyPath: m_TargetDisplay
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7675327168451010893, guid: dd70f840637664c4b918fa452814cab2, type: 3}
+      propertyPath: m_AllowDynamicResolution
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 8684031677331608733, guid: dd70f840637664c4b918fa452814cab2, type: 3}
       propertyPath: m_Name
       value: ParallaxBackGround
