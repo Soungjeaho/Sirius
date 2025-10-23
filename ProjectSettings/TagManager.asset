@@ -5,17 +5,21 @@ TagManager:
   serializedVersion: 2
   tags:
   - Ground
+  - Reelbackable
   - Enemy
+  - RB_Wall
+  - Wall
+  - Obstacle
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - Interactable
+  - Ground
   - Water
   - UI
-  - Ground
-  - Projectile
-  - Player
+  - Reelbackable
+  - obstacleMask
+  - 
   - 
   - 
   - 
@@ -42,7 +46,4 @@ TagManager:
   m_SortingLayers:
   - name: Default
     uniqueID: 0
-    locked: 0
-  - name: Interactable
-    uniqueID: 1082656903
     locked: 0
