@@ -85,6 +85,30 @@ public class NewReelback : MonoBehaviour
                 lr.enabled = true;
                 lr.positionCount = 2;
             }
+
+            StartCoroutine(CheckHookDistanceCoroutine(currentHook, FirePoint.position));
+        }
+    }
+    private IEnumerator CheckHookDistanceCoroutine(GameObject hook, Vector2 startPos)
+    {
+        while (hook != null)
+        {
+            float distance = Vector2.Distance(startPos, hook.transform.position);
+            if (distance > maxDistance)
+            {
+                Destroy(hook);
+                hook = null;
+
+                if (lr != null)
+                {
+                    lr.enabled = false;
+                    lr.positionCount = 0;
+                }
+
+                yield break;
+            }
+
+            yield return null;
         }
     }
 
