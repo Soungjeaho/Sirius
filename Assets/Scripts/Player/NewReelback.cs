@@ -59,9 +59,9 @@ public class NewReelback : MonoBehaviour
     private void Flip()
     {
         facingRight = !facingRight;
-        Vector3 scale = playerSprite.transform.localScale;
-        scale.y *= -1;
-        playerSprite.transform.localScale = scale;
+        Quaternion Rotation = playerSprite.transform.localRotation;
+        Rotation.y += 180;
+        playerSprite.transform.localRotation = Rotation;
     }
 
     private void TryFire()
