@@ -1332,15 +1332,24 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a54698a1cac645941afa099f3f82ddc9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  walkSpeed: 3
-  runSpeed: 6
-  jumpForce: 7
-  doubleJumpForce: 6
-  doubleTapTime: 0.5
+  stats:
+    maxHP: 5
+    currentHP: 0
+    walkSpeed: 5
+    jumpForce: 8
+    doubleJumpForce: 10
+    attackDamage: 1
+    attackRange: 25
+    attackDelay: 1.5
+    gaugeMax: 12
+    gaugeCurrent: 0
+    gaugeRecoverOnKill: 3
   interactKey: 101
   inventoryPanel: {fileID: 0}
   mapPanel: {fileID: 0}
   menuPanel: {fileID: 0}
+  gaugePanel: {fileID: 0}
+  doubleTapTime: 0.5
 --- !u!114 &482684292
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1355,9 +1364,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   acquiredAbilities: []
   inventoryItems: []
-  health: 100
-  stamina: 50
-  mana: 30
+  health: 5
+  stamina: 10
+  mana: 10
   currentMapName: DarkVillage
 --- !u!1 &556029340
 GameObject:
