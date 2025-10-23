@@ -1,7 +1,5 @@
-using System.Diagnostics;
 using UnityEngine;
 using UnityEngine.UI;
-using Debug = UnityEngine.Debug;
 
 public class EnergyGauge : MonoBehaviour
 {
@@ -9,12 +7,12 @@ public class EnergyGauge : MonoBehaviour
     [SerializeField] private int currentGauge = 0;
 
     [Header("UI References")]
-    [SerializeField] private EnergyGaugeUI gaugeUI;
     [SerializeField] private Image[] gaugeBlocks;
 
     private void Start()
     {
-        gaugeUI.UpdateUI(currentGauge, maxGauge);
+        UpdateUI();
+
         Debug.Log("1번: Gauge + 1");
         Debug.Log("2번: Gauge - 1");
         Debug.Log("3번: Gauge 풀 충전");
@@ -27,9 +25,8 @@ public class EnergyGauge : MonoBehaviour
 
     public void AddGauge(int amount)
     {
-        int prev = currentGauge;
         currentGauge = Mathf.Clamp(currentGauge + amount, 0, maxGauge);
-        gaugeUI.UpdateUI(currentGauge, maxGauge);
+        UpdateUI();
     }
 
     public bool UseGauge(int amount)
@@ -38,7 +35,7 @@ public class EnergyGauge : MonoBehaviour
             return false;
 
         currentGauge -= amount;
-        gaugeUI.UpdateUI(currentGauge, maxGauge);
+        UpdateUI();
         return true;
     }
 
@@ -46,7 +43,15 @@ public class EnergyGauge : MonoBehaviour
     {
         for (int i = 0; i < gaugeBlocks.Length; i++)
         {
-            gaugeBlocks[i].enabled = (i < currentGauge);
+            Color c = gaugeBlocks[i].color;
+
+            // 현재 게이지 이하일 경우 완전 불투명, 초과 시 반투명 처리
+            if (i < currentGauge)
+                c.a = 255f / 255f;
+            else
+                c.a = 50f / 255f;
+
+            gaugeBlocks[i].color = c;
         }
     }
 
@@ -55,7 +60,7 @@ public class EnergyGauge : MonoBehaviour
         return currentGauge >= maxGauge;
     }
 
-    public void TestGauge()
+    private void TestGauge()
     {
         if (Input.GetKeyDown(KeyCode.Alpha1))
         {
