@@ -185,4 +185,6 @@ public class PlayerController2D : MonoBehaviour
         Gizmos.color = Color.yellow;
         Gizmos.DrawWireSphere(transform.position, 1.5f);
     }
+
+
 }
