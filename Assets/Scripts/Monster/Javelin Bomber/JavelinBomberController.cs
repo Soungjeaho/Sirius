@@ -9,7 +9,7 @@ public class JavelinBomberController : BaseMonster
     public float jumpHeight = 3f;       // 점프 높이
     public float jumpDuration = 0.5f;   // 점프 시간
     public float bombDelay = 0.1f;      // 폭탄 떨어뜨리는 딜레이
-    public float attackDelay = 2f;
+    public float BombattackDelay = 2f;
 
     private float lastAttackTime = 0f;
 
@@ -64,7 +64,7 @@ public class JavelinBomberController : BaseMonster
     protected override void MoveTowardsPlayer()
     {
         // 점프 공격 중에는 이동 금지
-        if (Time.time - lastAttackTime < attackDelay) return;
+        if (Time.time - lastAttackTime < BombattackDelay) return;
 
         base.MoveTowardsPlayer();
     }

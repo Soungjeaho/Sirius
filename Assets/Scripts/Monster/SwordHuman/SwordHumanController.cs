@@ -16,7 +16,7 @@ public class SwordHumanController : MonoBehaviour
     public float jumpAttackRange = 50f;
     public float jumpSpeed = 5f;
 
-    public float attackDelay = 2.5f;
+    public float SwordHumanattackDelay = 2.5f;
 
     [Header("Hitbox")]
     public Collider2D hitbox; // Inspector에서 할당
@@ -51,7 +51,7 @@ public class SwordHumanController : MonoBehaviour
         }
         else
         {
-            if (Time.time - lastAttackTime > attackDelay)
+            if (Time.time - lastAttackTime > SwordHumanattackDelay)
             {
                 lastAttackTime = Time.time;
                 StartCoroutine(JumpAttack());

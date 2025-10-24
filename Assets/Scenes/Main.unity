@@ -501,11 +501,23 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 314758072180889524, guid: 16c1f14637bc81a4b89920fda2ffb051, type: 3}
       propertyPath: attackRange
-      value: 1.5
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 314758072180889524, guid: 16c1f14637bc81a4b89920fda2ffb051, type: 3}
+      propertyPath: detectRange
+      value: 9
       objectReference: {fileID: 0}
     - target: {fileID: 314758072180889524, guid: 16c1f14637bc81a4b89920fda2ffb051, type: 3}
       propertyPath: groundLayer.m_Bits
       value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 921651771884174328, guid: 16c1f14637bc81a4b89920fda2ffb051, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -0.062
+      objectReference: {fileID: 0}
+    - target: {fileID: 921651771884174328, guid: 16c1f14637bc81a4b89920fda2ffb051, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -1.069
       objectReference: {fileID: 0}
     - target: {fileID: 2776253392767305155, guid: 16c1f14637bc81a4b89920fda2ffb051, type: 3}
       propertyPath: m_Name
@@ -514,6 +526,18 @@ PrefabInstance:
     - target: {fileID: 2776253392767305155, guid: 16c1f14637bc81a4b89920fda2ffb051, type: 3}
       propertyPath: m_IsActive
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4750138580934242815, guid: 16c1f14637bc81a4b89920fda2ffb051, type: 3}
+      propertyPath: m_IsTrigger
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4750138580934242815, guid: 16c1f14637bc81a4b89920fda2ffb051, type: 3}
+      propertyPath: m_SpriteTilingProperty.oldSize.x
+      value: 3.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4750138580934242815, guid: 16c1f14637bc81a4b89920fda2ffb051, type: 3}
+      propertyPath: m_SpriteTilingProperty.oldSize.y
+      value: 3.2
       objectReference: {fileID: 0}
     - target: {fileID: 7465069731002946103, guid: 16c1f14637bc81a4b89920fda2ffb051, type: 3}
       propertyPath: m_LocalPosition.x
@@ -665,6 +689,10 @@ PrefabInstance:
       propertyPath: maxDistance
       value: 6
       objectReference: {fileID: 0}
+    - target: {fileID: 2027394561698885683, guid: 1178bed9895366a469ffe493621d04c8, type: 3}
+      propertyPath: m_Layer
+      value: 8
+      objectReference: {fileID: 0}
     - target: {fileID: 4952916496549180679, guid: 1178bed9895366a469ffe493621d04c8, type: 3}
       propertyPath: jumpForce
       value: 8
@@ -709,6 +737,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6650060558128954890, guid: 1178bed9895366a469ffe493621d04c8, type: 3}
+      propertyPath: m_Layer
+      value: 8
+      objectReference: {fileID: 0}
     - target: {fileID: 6897985528407505374, guid: 1178bed9895366a469ffe493621d04c8, type: 3}
       propertyPath: gauge
       value: 
@@ -716,6 +748,10 @@ PrefabInstance:
     - target: {fileID: 7220545932785041715, guid: 1178bed9895366a469ffe493621d04c8, type: 3}
       propertyPath: m_Name
       value: Player
+      objectReference: {fileID: 0}
+    - target: {fileID: 7220545932785041715, guid: 1178bed9895366a469ffe493621d04c8, type: 3}
+      propertyPath: m_Layer
+      value: 8
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -8909,11 +8945,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4214646545089406516, guid: 52cc701258ac190438c80b5f66c2ad37, type: 3}
       propertyPath: m_SpriteTilingProperty.oldSize.x
-      value: 1.5
+      value: 2.4
       objectReference: {fileID: 0}
     - target: {fileID: 4214646545089406516, guid: 52cc701258ac190438c80b5f66c2ad37, type: 3}
       propertyPath: m_SpriteTilingProperty.oldSize.y
-      value: 1.5
+      value: 2.4
       objectReference: {fileID: 0}
     - target: {fileID: 4375354431395873839, guid: 52cc701258ac190438c80b5f66c2ad37, type: 3}
       propertyPath: m_LocalScale.y
@@ -9127,7 +9163,7 @@ MonoBehaviour:
   contactDamage: 1
   detectRange: 5
   attackRange: 1
-  attackDelay: 2
+  EnemyattackDelay: 2
   attackDamage: 1
   groundCheck: {fileID: 0}
   groundLayer:

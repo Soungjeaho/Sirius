@@ -13,7 +13,7 @@ public abstract class BaseMonster : MonoBehaviour
     [Header("전투")]
     public float detectRange = 5f;
     public float attackRange = 1f;
-    public float attackDelay = 2f;
+    public float EnemyattackDelay = 2f;
     public int attackDamage = 1;
 
     [Header("지면 체크 (선택사항)")]
@@ -81,10 +81,24 @@ public abstract class BaseMonster : MonoBehaviour
     // ----------------------
     protected virtual void TryAttack(float distance)
     {
-        if (Time.time - lastAttackTime < attackDelay) return;
-
-        if (distance <= attackRange)
+        // 1. 쿨타임
+        if (Time.time - lastAttackTime < EnemyattackDelay) return;
+        // 2. 현재 상태 체크 (죽었거나 끌려오거나, 리지드바디 비활성 등)
+        if (isDead || rb.isKinematic) return; // <--- 추가
+                                              // 3. 진짜 근접했을 때만 공격
+        if (distance <= attackRange && isGrounded)
         {
+            lastAttackTime = Time.time;
+            Attack();
+        }
+        if (Time.time - lastAttackTime < EnemyattackDelay) return;
+        if (isDead || rb.isKinematic) return;
+
+        Debug.Log($"{name}: 거리={distance}, 공격범위={attackRange}, isGrounded={isGrounded}");
+
+        if (distance <= attackRange && isGrounded)
+        {
+            Debug.Log($"{name}: 공격 시도!");
             lastAttackTime = Time.time;
             Attack();
         }

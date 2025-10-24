@@ -14,7 +14,7 @@ public class ScavengerController : BaseMonster
     {
         base.Start();
         attackRange = 15f;   // BaseMonster의 attackRange 사용
-        attackDelay = 2f;    // BaseMonster의 attackDelay 사용
+        EnemyattackDelay = 2f;    // BaseMonster의 attackDelay 사용
         explosionRange = 35f;
         explosionDelay = 1.5f;
         explosionDamage = 2;
@@ -33,7 +33,7 @@ public class ScavengerController : BaseMonster
 
         float distance = Vector2.Distance(transform.position, player.position);
 
-        if (distance <= attackRange && Time.time - lastAttackTime > attackDelay)
+        if (distance <= attackRange && Time.time - lastAttackTime > EnemyattackDelay)
         {
             StartCoroutine(NormalAttack());
         }

@@ -19,7 +19,7 @@ public class SawHumanController : MonoBehaviour
     private Transform player;
     private bool isDashing = false;
     private float lastAttackTime = 0f;
-    private float attackDelay = 2f;
+    private float SawattackDelay = 2f;
 
     void Start()
     {
@@ -34,11 +34,11 @@ public class SawHumanController : MonoBehaviour
 
         if (isDashing) return;
 
-        if (distance <= dashRange && Time.time - lastAttackTime > attackDelay)
+        if (distance <= dashRange && Time.time - lastAttackTime > SawattackDelay)
         {
             StartCoroutine(JumpAttack());
         }
-        else if (distance <= attackRange && Time.time - lastAttackTime > attackDelay)
+        else if (distance <= attackRange && Time.time - lastAttackTime > SawattackDelay)
         {
             StartCoroutine(Slash2Hit());
         }

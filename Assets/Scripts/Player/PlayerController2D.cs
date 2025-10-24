@@ -151,7 +151,7 @@ public class PlayerController2D : MonoBehaviour
     #region 공격 / 게이지
     public void Attack()
     {
-        if (Time.time - lastAttackTime < stats.attackDelay) return;
+        if (Time.time - lastAttackTime < stats.playerattackDelay) return;
 
         lastAttackTime = Time.time;
 
@@ -234,7 +234,8 @@ public class PlayerStats
 
     public int attackDamage = 1;
     public float attackRange = 25f;
-    public float attackDelay = 1.5f;
+  
+    public float playerattackDelay = 1.5f;
 
     public int gaugeMax = 12;
     public int gaugeCurrent;
