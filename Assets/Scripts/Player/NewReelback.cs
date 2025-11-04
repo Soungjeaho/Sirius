@@ -204,7 +204,7 @@ public class NewReelback : MonoBehaviour
             Rigidbody2D rb = player.GetComponent<Rigidbody2D>();
             if (rb != null)
             {
-                rb.gravityScale = 2f;
+                rb.gravityScale = 1f;
                 rb.constraints = RigidbodyConstraints2D.FreezeRotation;
             }
         }

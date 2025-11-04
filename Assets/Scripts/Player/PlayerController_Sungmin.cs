@@ -6,7 +6,8 @@ public class PlayerController_Sungmin : MonoBehaviour
 {
     [Header("Movement Settings")]
     [SerializeField] private float walkSpeed = 5;
-    [SerializeField] private float jumpForce = 20;
+    [SerializeField] private float jumpForce = 10;
+    [SerializeField] private int maxJumpCount = 2; // ✅ 점프 가능 횟수 (2면 더블 점프)
 
     [Header("Ground Check")]
     [SerializeField] private Transform groundCheckPoint;
@@ -14,10 +15,11 @@ public class PlayerController_Sungmin : MonoBehaviour
     [SerializeField] private LayerMask whatIsGround;
 
     [Header("References")]
-    [SerializeField] private NewReelback reelback;   // 새로 분리된 릴백 시스템 참조
+    [SerializeField] private NewReelback reelback;
 
     private Rigidbody2D rb;
     private float xAxis;
+    private int jumpCount; // ✅ 현재 점프 횟수
 
     public static PlayerController_Sungmin Instance;
 
@@ -42,7 +44,6 @@ public class PlayerController_Sungmin : MonoBehaviour
     {
         GetInputs();
 
-        // 그래플링 중이 아닐 때만 이동 가능
         if (!reelback.IsGrappling)
         {
             Move();
@@ -50,6 +51,11 @@ public class PlayerController_Sungmin : MonoBehaviour
 
         Jump();
 
+        // ✅ 땅에 닿으면 점프 횟수 초기화
+        if (Grounded())
+        {
+            jumpCount = 0;
+        }
     }
 
     void GetInputs()
@@ -66,17 +72,19 @@ public class PlayerController_Sungmin : MonoBehaviour
     {
         if (Input.GetButtonDown("Jump"))
         {
-            // 땅에 있거나 그래플 중일 때 점프 가능
-            if (Grounded() || reelback.IsGrappling)
+            // ✅ 점프 가능 조건: (땅 위) 또는 (점프 횟수가 최대 미만)
+            if (Grounded() || jumpCount < maxJumpCount)
             {
+                // 그래플 중이라면 해제
                 if (reelback.IsGrappling)
-                    reelback.StopGrapple(); // 그래플 중 점프 시 해제
+                    reelback.StopGrapple();
 
                 rb.velocity = new Vector2(rb.velocity.x, jumpForce);
+                jumpCount++; // ✅ 점프 횟수 증가
             }
         }
 
-        // 점프키 떼면 상승 중일 때 점프 끊기
+        // 점프키를 떼면 상승 중일 때 점프 끊기
         if (Input.GetButtonUp("Jump") && rb.velocity.y > 0)
         {
             rb.velocity = new Vector2(rb.velocity.x, 0);
@@ -85,7 +93,6 @@ public class PlayerController_Sungmin : MonoBehaviour
 
     public bool Grounded()
     {
-        // 간단한 원 충돌 기반 땅 체크
         return Physics2D.OverlapCircle(groundCheckPoint.position, groundCheckRadius, whatIsGround);
     }
 
@@ -96,7 +103,6 @@ public class PlayerController_Sungmin : MonoBehaviour
 
     private void OnDrawGizmosSelected()
     {
-        // 에디터에서 Ground Check 범위 시각화
         Gizmos.color = Color.green;
         Gizmos.DrawWireSphere(groundCheckPoint.position, groundCheckRadius);
     }
