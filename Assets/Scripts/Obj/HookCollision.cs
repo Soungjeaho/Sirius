@@ -3,6 +3,7 @@ using UnityEngine;
 public class HookCollision : MonoBehaviour
 {
     private NewReelback reelback;
+    private bool hasHit = false;
 
     public void Init(NewReelback rb)
     {
@@ -11,30 +12,46 @@ public class HookCollision : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (reelback == null) return;
+        if (hasHit || reelback == null)
+            return;
 
-        Vector2 hitPos = collision.ClosestPoint(transform.position); // 충돌 지점 계산
+        hasHit = true;
 
+        Vector2 hitPos = collision.ClosestPoint(transform.position);
+
+        //  적 충돌
         if (collision.CompareTag("Enemy"))
         {
-            reelback.OnHookHit(collision.tag, hitPos);
-            collision.isTrigger = true;
+            reelback.OnHookHit("Enemy", hitPos);
         }
+        //  당길 수 있는 오브젝트
         else if (collision.CompareTag("Reelbackable"))
         {
-            reelback.OnHookHit(collision.tag, collision.ClosestPoint(transform.position));
+            reelback.OnHookHit("Reelbackable", hitPos);
         }
+        //  릴백용 벽 (매달리기)
         else if (collision.CompareTag("RB_Wall"))
         {
-            reelback.OnHookHit(collision.tag, hitPos); // 태그 + 위치 전달
+            reelback.OnHookHit("RB_Wall", hitPos);
         }
-        else if(collision.CompareTag("Ground")|| collision.CompareTag("Obstacle"))
+        //  일반 지면 / 장애물
+        else if (collision.CompareTag("Ground") || collision.CompareTag("Obstacle"))
         {
-            // Ground에 닿으면 즉시 Hook 제거
+            // Hook 삭제
             Destroy(gameObject);
 
-            // LineRenderer도 꺼주면 깔끔함
-            if (reelback != null && reelback.lr != null)
+            // 라인렌더러 정리
+            if (reelback.lr != null)
+            {
+                reelback.lr.enabled = false;
+                reelback.lr.positionCount = 0;
+            }
+        }
+        //  나머지 경우 — Hook만 제거
+        else
+        {
+            Destroy(gameObject);
+            if (reelback.lr != null)
             {
                 reelback.lr.enabled = false;
                 reelback.lr.positionCount = 0;

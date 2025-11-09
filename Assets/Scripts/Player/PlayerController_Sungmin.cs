@@ -23,13 +23,16 @@ public class PlayerController_Sungmin : MonoBehaviour
 
     [Header("References")]
     [SerializeField] private NewReelback reelback;
+    [SerializeField] private HeavyFloat heavyFloat; // 무거운 찌 추가
+    [SerializeField] private HookModeUI hookModeUI;
 
     private Rigidbody2D rb;
     private float xAxis;
     private int jumpCount;
     private bool canAttack = true;
+    private int hookMode = 1; // 1: Normal, 2: Heavy
 
-    private Vector2 lastAttackDir = Vector2.right; //  마지막 공격 방향 저장
+    private Vector2 lastAttackDir = Vector2.right;
 
     public static PlayerController_Sungmin Instance;
 
@@ -48,10 +51,13 @@ public class PlayerController_Sungmin : MonoBehaviour
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
+        SetHookMode(1); // 시작 시 Normal 상태
     }
 
     void Update()
     {
+        HandleHookSwitch(); // 마우스 휠 감지
+
         GetInputs();
 
         if (!reelback.IsGrappling)
@@ -68,7 +74,53 @@ public class PlayerController_Sungmin : MonoBehaviour
         }
     }
 
-    void GetInputs()
+    // 마우스 휠로 찌 교체
+    private void HandleHookSwitch()
+    {
+        float scroll = Input.GetAxis("Mouse ScrollWheel");
+
+        int prevMode = hookMode; // 이전 모드 저장
+
+        if (scroll > 0f)
+        {
+            hookMode--;
+        }
+        else if (scroll < 0f)
+        {
+            hookMode++;
+        }
+
+        hookMode = Mathf.Clamp(hookMode, 1, 2);
+
+        // 🔹 모드가 실제로 바뀐 경우에만 적용
+        if (hookMode != prevMode)
+        {
+            SetHookMode(hookMode);
+        }
+    }
+
+    // 찌 교체 로직
+    private void SetHookMode(int mode)
+    {
+        switch (mode)
+        {
+            case 1: // Normal Hook
+                reelback.enabled = true;
+                if (heavyFloat != null) heavyFloat.enabled = false;
+                break;
+
+            case 2: // Heavy Hook
+                reelback.enabled = false;
+                if (heavyFloat != null) heavyFloat.enabled = true;
+                break;
+        }
+
+        if (hookModeUI != null) 
+            hookModeUI.UpdateUI(mode);
+        //  실제로 변경된 경우에만 한 번 출력
+        Debug.Log($"[Hook Mode] 현재 찌: {(mode == 1 ? "Normal" : "Heavy")}");
+    }
+    private void GetInputs()
     {
         xAxis = Input.GetAxisRaw("Horizontal");
     }
@@ -100,6 +152,9 @@ public class PlayerController_Sungmin : MonoBehaviour
 
     private void Attack()
     {
+        if (hookMode == 2)
+            return;
+
         if (Input.GetMouseButtonDown(0) && canAttack)
         {
             StartCoroutine(PerformAttack());
@@ -110,18 +165,16 @@ public class PlayerController_Sungmin : MonoBehaviour
     {
         canAttack = false;
 
-        // 마우스 방향 계산
         Vector2 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         Vector2 dir = (mousePos - (Vector2)transform.position).normalized;
-        lastAttackDir = dir; //  기즈모용 방향 저장
+        lastAttackDir = dir;
         Vector2 attackCenter = (Vector2)transform.position + dir * attackMaxDistance;
 
-        //  충돌체 탐색 (모든 오브젝트 대상으로)
         Collider2D[] hits = Physics2D.OverlapCircleAll(attackCenter, attackRadius);
 
         foreach (Collider2D hit in hits)
         {
-            if (hit.CompareTag("Enemy")) //  태그로 판정
+            if (hit.CompareTag("Enemy"))
             {
                 float dist = Vector2.Distance(transform.position, hit.transform.position);
 
@@ -155,24 +208,18 @@ public class PlayerController_Sungmin : MonoBehaviour
         Gizmos.color = Color.green;
         Gizmos.DrawWireSphere(groundCheckPoint.position, groundCheckRadius);
 
-            //공격 범위 기즈모
         if (Camera.main != null)
         {
             Vector2 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
             Vector2 dir = Application.isPlaying ? lastAttackDir : (mousePos - (Vector2)transform.position).normalized;
             Vector2 attackCenter = (Vector2)transform.position + dir * attackMaxDistance;
 
-            // 최소/최대 사거리 시각화
             Gizmos.color = Color.yellow;
             Gizmos.DrawWireSphere((Vector2)transform.position + dir * attackMinDistance, 0.1f);
             Gizmos.color = Color.red;
             Gizmos.DrawWireSphere((Vector2)transform.position + dir * attackMaxDistance, 0.1f);
-
-            // 실제 공격 범위 (적중 구체)
             Gizmos.color = Color.cyan;
             Gizmos.DrawWireSphere(attackCenter, attackRadius);
-
-            // 공격 방향 선
             Gizmos.color = Color.white;
             Gizmos.DrawLine(transform.position, (Vector2)transform.position + dir * attackMaxDistance);
         }

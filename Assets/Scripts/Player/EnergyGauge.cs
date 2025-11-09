@@ -72,7 +72,7 @@ public class EnergyGauge : MonoBehaviour
         }
         else if (Input.GetKeyDown(KeyCode.Alpha3))
         {
-            AddGauge(10);
+            AddGauge(12);
         }
     }
 }
