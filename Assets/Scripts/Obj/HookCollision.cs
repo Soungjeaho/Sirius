@@ -28,17 +28,5 @@ public class HookCollision : MonoBehaviour
         {
             reelback.OnHookHit(collision.tag, hitPos); // 태그 + 위치 전달
         }
-        else if(collision.CompareTag("Ground")|| collision.CompareTag("Obstacle"))
-        {
-            // Ground에 닿으면 즉시 Hook 제거
-            Destroy(gameObject);
-
-            // LineRenderer도 꺼주면 깔끔함
-            if (reelback != null && reelback.lr != null)
-            {
-                reelback.lr.enabled = false;
-                reelback.lr.positionCount = 0;
-            }
-        }
     }
 }

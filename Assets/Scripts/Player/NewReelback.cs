@@ -66,10 +66,6 @@ public class NewReelback : MonoBehaviour
 
     private void TryFire()
     {
-        // 이미 Grappling 중이라면 발사 불가
-        if (IsGrappling)
-            return;
-
         if (Input.GetMouseButtonDown(1) && currentHook == null)
         {
             currentHook = Instantiate(HookPrefab, FirePoint.position, Quaternion.identity);
@@ -83,7 +79,7 @@ public class NewReelback : MonoBehaviour
             HookCollision hookCol = currentHook.AddComponent<HookCollision>();
             hookCol.Init(this);
 
-            // 발사 직후 LineRenderer 활성화
+            // 발사 직후 LR 활성화
             if (lr != null)
             {
                 lr.enabled = true;
