@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Project.NPC;
 using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody2D))]
@@ -139,7 +140,7 @@ public class PlayerController2D : MonoBehaviour
         }
 
         if (Input.GetKey(key))
-            ;
+            
 
         if (Input.GetKeyUp(key))
         {
@@ -161,7 +162,7 @@ public class PlayerController2D : MonoBehaviour
         {
             if (hit.CompareTag("Enemy"))
             {
-                var enemy = hit.GetComponent<BaseMonster>();
+                var enemy = hit.GetComponent<EnemyBase>();
                 if (enemy != null)
                 {
                     enemy.TakeDamage(stats.attackDamage);
