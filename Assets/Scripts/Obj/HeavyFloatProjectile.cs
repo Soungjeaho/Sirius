@@ -27,6 +27,10 @@ public class HeavyFloatProjectile : MonoBehaviour
         {
             HandleEnemyHit(collision);
         }
+        else if (collision.CompareTag("BalancePlatform"))
+        {
+            HandleBalancePlatform(collision);
+        }
         else if (collision.CompareTag("RB_Wall") || collision.CompareTag("Ground"))
         {
             HandleRebound();
@@ -56,6 +60,20 @@ public class HeavyFloatProjectile : MonoBehaviour
 
         StartCoroutine(ReboundAndDestroy());
     }
+
+    private void HandleBalancePlatform(Collider2D col)
+    {
+        BalancePlatform platform = col.GetComponent<BalancePlatform>();
+        if (platform != null)
+        {
+            Vector2 hitDir = (col.transform.position - transform.position).normalized;
+            Vector2 hitPoint = col.ClosestPoint(transform.position);
+            platform.OnHeavyHit(hitDir, hitPoint);
+        }
+
+        StartCoroutine(ReboundAndDestroy());
+    }
+
 
     private void HandleRebound()
     {

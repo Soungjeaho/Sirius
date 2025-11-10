@@ -29,7 +29,9 @@ public class PlayerController_Sungmin : MonoBehaviour
     private Rigidbody2D rb;
     private float xAxis;
     private int jumpCount;
+    private bool wasGrounded = false; // 직전 프레임의 착지 상태 저장
     private bool canAttack = true;
+
     private int hookMode = 1; // 1: Normal, 2: Heavy
 
     private Vector2 lastAttackDir = Vector2.right;
@@ -56,8 +58,7 @@ public class PlayerController_Sungmin : MonoBehaviour
 
     void Update()
     {
-        HandleHookSwitch(); // 마우스 휠 감지
-
+        HandleHookSwitch();
         GetInputs();
 
         if (!reelback.IsGrappling)
@@ -68,12 +69,17 @@ public class PlayerController_Sungmin : MonoBehaviour
         Jump();
         Attack();
 
-        if (Grounded())
+        // ✅ 착지 상태 갱신
+        bool groundedNow = Grounded();
+
+        // 착지한 순간에만 jumpCount 초기화
+        if (groundedNow && !wasGrounded)
         {
             jumpCount = 0;
         }
-    }
 
+        wasGrounded = groundedNow;
+    }
     // 마우스 휠로 찌 교체
     private void HandleHookSwitch()
     {
@@ -149,6 +155,7 @@ public class PlayerController_Sungmin : MonoBehaviour
             rb.velocity = new Vector2(rb.velocity.x, 0);
         }
     }
+
 
     private void Attack()
     {

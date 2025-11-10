@@ -11,6 +11,7 @@ TagManager:
   - Wall
   - Obstacle
   - PlayerAttack
+  - BalancePlatform
   layers:
   - Default
   - TransparentFX
