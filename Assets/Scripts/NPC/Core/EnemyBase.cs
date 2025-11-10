@@ -19,6 +19,18 @@ namespace Project.NPC
         protected int _hp; protected EnemyState _state; protected Transform _player; protected bool _facingRight = true; protected bool _busy = false; protected float _lastAttack = -999f;
         public bool IsDead => _state == EnemyState.Dead;
 
+        // EnemyBase.cs
+          // Awake에서 gfxRoot 하위에서 캐시했다면 그대로 사용
+
+        protected float FacingSign()
+        {
+            // SpriteRenderer.flipX를 쓰는 경우: flipX=true면 왼쪽(-1), false면 오른쪽(+1)
+            if (_sr) return _sr.flipX ? -1f : 1f;
+
+            // 스케일 반전을 쓰는 경우(폴백)
+            return (gfxRoot && Mathf.Sign(gfxRoot.localScale.x) < 0f) ? -1f : 1f;
+        }
+
         protected virtual void Awake()
         {
             if (!rb) rb = GetComponent(typeof(UnityEngine.Rigidbody2D)) as UnityEngine.Rigidbody2D;
@@ -26,6 +38,8 @@ namespace Project.NPC
 
             if (gfxRoot)
                 _sr = gfxRoot.GetComponentInChildren<SpriteRenderer>(true);
+            if (gfxRoot) _sr = gfxRoot.GetComponentInChildren<SpriteRenderer>(true);
+
         }
 
 
