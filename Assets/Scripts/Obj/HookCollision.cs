@@ -19,35 +19,60 @@ public class HookCollision : MonoBehaviour
 
         Vector2 hitPos = collision.ClosestPoint(transform.position);
 
-        //  적 충돌
+        //  1. Enemy 충돌
         if (collision.CompareTag("Enemy"))
         {
+            //  EnemyGrapple을 찾아서 StartGrapple 실행
+            EnemyGrapple enemyGrapple = reelback.GetComponent<EnemyGrapple>();
+            if (enemyGrapple != null)
+            {
+                enemyGrapple.StartGrapple(collision.gameObject);
+                Debug.Log($"[HookCollision] Enemy 감지 → Grapple 시작: {collision.name}");
+            }
+            else
+            {
+                Debug.LogWarning("[HookCollision] EnemyGrapple 컴포넌트를 찾을 수 없습니다. Player에 붙어 있는지 확인하세요!");
+            }
+
+            // 라인 연결용 위치 전달
             reelback.OnHookHit("Enemy", hitPos);
+
+            // Hook은 제거하되, Grapple이 진행 중이므로 라인은 유지
+            Destroy(gameObject, 0.05f);
+            return;
         }
-        //  당길 수 있는 오브젝트
+
+        //  2. 당길 수 있는 오브젝트
         else if (collision.CompareTag("Reelbackable"))
         {
             reelback.OnHookHit("Reelbackable", hitPos);
+            Destroy(gameObject, 0.05f);
+            return;
         }
-        //  릴백용 벽 (매달리기)
+
+        //  3. 릴백용 벽 (매달리기)
         else if (collision.CompareTag("RB_Wall"))
         {
             reelback.OnHookHit("RB_Wall", hitPos);
+            Destroy(gameObject, 0.05f);
+            return;
         }
-        //  일반 지면 / 장애물
+
+        //  4. 일반 지면 / 장애물
         else if (collision.CompareTag("Ground") || collision.CompareTag("Obstacle"))
         {
-            // Hook 삭제
             Destroy(gameObject);
 
-            // 라인렌더러 정리
             if (reelback.lr != null)
             {
                 reelback.lr.enabled = false;
                 reelback.lr.positionCount = 0;
             }
+
+            return;
         }
-        //  나머지 경우 — Hook만 제거
+
+        //  5. 그 외 충돌 (기타 오브젝트)
         else
         {
             Destroy(gameObject);

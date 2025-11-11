@@ -59,9 +59,9 @@ public class NewReelback : MonoBehaviour
         Vector2 mousePos = mouseWorld;
         FireDirection = (mousePos - (Vector2)FirePoint.position).normalized;
 
-        if (mousePos.x < transform.position.x && facingRight)
+        if (mousePos.x < FirePoint.position.x && facingRight)
             Flip(false);
-        else if (mousePos.x > transform.position.x && !facingRight)
+        else if (mousePos.x > FirePoint.position.x && !facingRight)
             Flip(true);
     }
 
@@ -129,25 +129,36 @@ public class NewReelback : MonoBehaviour
 
     public void OnHookHit(string tag, Vector2 hitPos)
     {
-        hookTriggered = true;
-        fixedHookPosition = hitPos;
-
         if (currentHook != null)
         {
             Destroy(currentHook);
             currentHook = null;
         }
 
+        if (tag == "Enemy")
+        {
+            // EnemyGrapple이 라인을 관리하므로 상태를 건드리지 않는다.
+            // fixedHookPosition, hookTriggered 설정도 하지 않는다.
+            return;
+        }
+
         if (tag == "RB_Wall")
         {
+            hookTriggered = true;
+            fixedHookPosition = hitPos;
+
             StopAllCoroutines();
             StartCoroutine(SnapPlayerToWall(hitPos));
         }
         else if (tag == "Reelbackable")
         {
+            hookTriggered = true;
+            fixedHookPosition = hitPos;
+
             pullTarget = GameObject.FindWithTag("Reelbackable");
         }
     }
+
 
     private IEnumerator SnapPlayerToWall(Vector2 hitPos)
     {
@@ -220,8 +231,24 @@ public class NewReelback : MonoBehaviour
         }
     }
 
+    public void ResetHookState()
+    {
+        hookTriggered = false;
+
+        if (lr != null)
+        {
+            lr.enabled = false;
+            lr.positionCount = 0;
+        }
+    }
+
     private void UpdateLine()
     {
+        if (isEnemyBeingGrappled)
+        {
+            return;
+        }
+
         if (currentHook != null)
         {
             if (lr != null)
@@ -237,6 +264,7 @@ public class NewReelback : MonoBehaviour
         {
             if (lr != null)
             {
+                lr.enabled = true;
                 lr.positionCount = 2;
                 lr.SetPosition(0, FirePoint.position);
                 lr.SetPosition(1, fixedHookPosition);
@@ -251,7 +279,6 @@ public class NewReelback : MonoBehaviour
             }
         }
     }
-
     private void Update()
     {
         LookAtMouse();

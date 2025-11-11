@@ -4,43 +4,121 @@ using System.Collections;
 public class HeavyFloatProjectile : MonoBehaviour
 {
     [Header("기본 설정")]
-    [SerializeField] private int damage = 2;                // 피해량
-    [SerializeField] private float knockbackForce = 8f;     // 넉백 힘
-    [SerializeField] private float reboundForce = 5f;       // 반동 세기
-    [SerializeField] private float upwardBias = 0.5f;       // 튕김 시 위쪽 비율 (0.5면 위로 50%)
-    [SerializeField] private float destroyDelay = 0.2f;     // 삭제 전 대기 시간
+    [SerializeField] private int damage = 2;
+    [SerializeField] private float knockbackForce = 8f;
+    [SerializeField] private float enemyDestroyDelay = 0.2f;
+    [SerializeField] private float remainTime = 1.0f;
+    [SerializeField] private float backDeleteDistance = 1.0f;
 
-    private bool hasCollided = false;
-    private bool reboundStarted = false;
-    private Transform player;
+    private Transform firePoint;
+    private Vector2 fireDir;
+    private bool initialized = false;
+    private bool isDying = false;
+    private bool hasActivatedPlatform = false;
+
+    private Rigidbody2D rb;
 
     private void Awake()
     {
-        player = GameObject.FindWithTag("Player")?.transform;
+        rb = GetComponent<Rigidbody2D>();
     }
 
-    private void OnTriggerEnter2D(Collider2D collision)
+    private void Start()
     {
-        if (hasCollided) return;
+        Rigidbody2D rb = GetComponent<Rigidbody2D>();
+        if (rb != null)
+        {
+            rb.isKinematic = false;
+            rb.gravityScale = 1.5f;
+            rb.constraints = RigidbodyConstraints2D.FreezeRotation;
+        }
+    }
 
-        if (collision.CompareTag("Enemy"))
+    private void Update()
+    {
+        if (initialized && firePoint != null)
+            CheckBehindPlayer();
+    }
+
+    private void CheckBehindPlayer()
+    {
+        Vector2 currentDir = ((Vector2)transform.position - (Vector2)firePoint.position).normalized;
+        float dot = Vector2.Dot(fireDir, currentDir);
+        float distance = Vector2.Distance(transform.position, firePoint.position);
+
+        if (dot < 0f && distance > backDeleteDistance)
+            SafeDestroy();
+    }
+
+    public void SetFirePoint(Transform point)
+    {
+        firePoint = point;
+        StartCoroutine(InitializeFireDirection());
+    }
+
+    private IEnumerator InitializeFireDirection()
+    {
+        yield return null;
+        if (firePoint != null)
         {
-            HandleEnemyHit(collision);
+            fireDir = ((Vector2)transform.position - (Vector2)firePoint.position).normalized;
+            initialized = true;
         }
-        else if (collision.CompareTag("BalancePlatform"))
+    }
+
+    //  충돌 방식 변경 (Trigger → Collision)
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (isDying)
+            return;
+
+        // Player 즉시 제거
+        if (collision.collider.CompareTag("Player"))
         {
-            HandleBalancePlatform(collision);
-        }
-        else if (collision.CompareTag("RB_Wall") || collision.CompareTag("Ground"))
-        {
-            HandleRebound();
-        }
-        else
-        {
+            SafeDestroy();
             return;
         }
 
-        hasCollided = true;
+        // Enemy 피격
+        if (collision.collider.CompareTag("Enemy"))
+        {
+            HandleEnemyHit(collision.collider);
+            return;
+        }
+
+        // BalancePlatform: 최초 1회만 작동
+        if (collision.collider.CompareTag("BalancePlatform"))
+        {
+            if (!hasActivatedPlatform)
+            {
+                hasActivatedPlatform = true;
+                HandleBalancePlatformCollision(collision.collider);
+            }
+            StartCoroutine(DestroyAfterDelay());
+            return;
+        }
+
+        // BalanceTilemap
+        //if (collision.collider.CompareTag("BalanceTilemap"))
+        //{
+        //    var tilemap = collision.collider.GetComponent<BalanceTilemap>();
+        //    if (tilemap != null)
+        //    {
+        //        Vector2 hitPoint = collision.contacts[0].point;
+        //        Vector2 hitDir = ((Vector2)collision.collider.transform.position - (Vector2)transform.position).normalized;
+        //        tilemap.OnHeavyHit(hitDir, hitPoint);
+        //    }
+        //    StartCoroutine(DestroyAfterDelay());
+        //    return;
+        //}
+
+        // Ground / RB_Wall / Obstacle
+        if (collision.collider.CompareTag("Ground") ||
+            collision.collider.CompareTag("RB_Wall") ||
+            collision.collider.CompareTag("Obstacle"))
+        {
+            SafeDestroy();
+        }
     }
 
     private void HandleEnemyHit(Collider2D enemyCol)
@@ -58,43 +136,48 @@ public class HeavyFloatProjectile : MonoBehaviour
             }
         }
 
-        StartCoroutine(ReboundAndDestroy());
+        StartCoroutine(DestroyAfterDelay(enemyDestroyDelay));
     }
 
-    private void HandleBalancePlatform(Collider2D col)
+    private void HandleBalancePlatformCollision(Collider2D col)
     {
         BalancePlatform platform = col.GetComponent<BalancePlatform>();
-        if (platform != null)
-        {
-            Vector2 hitDir = (col.transform.position - transform.position).normalized;
-            Vector2 hitPoint = col.ClosestPoint(transform.position);
-            platform.OnHeavyHit(hitDir, hitPoint);
-        }
+        if (platform == null)
+            return;
 
-        StartCoroutine(ReboundAndDestroy());
-    }
+        Vector2 hitPoint = col.ClosestPoint(transform.position);
+        Vector2 hitDir = ((Vector2)col.transform.position - (Vector2)transform.position).normalized;
 
+        platform.OnHeavyHit(hitDir, hitPoint);
 
-    private void HandleRebound()
-    {
-        StartCoroutine(ReboundAndDestroy());
-    }
-
-    private IEnumerator ReboundAndDestroy()
-    {
-        if (reboundStarted) yield break;
-        reboundStarted = true;
-
+        //  살짝 아래로 반발시켜 멈춤 방지
         Rigidbody2D rb = GetComponent<Rigidbody2D>();
         if (rb != null)
         {
-            // 현재 이동 방향의 반대 + 위쪽 성분 추가
-            Vector2 reboundDir = (-rb.velocity.normalized + Vector2.up * upwardBias).normalized;
-            rb.velocity = Vector2.zero;
-            rb.AddForce(reboundDir * reboundForce, ForceMode2D.Impulse);
+            rb.velocity = Vector2.zero; // 충돌 순간 정지 방지용
+            rb.AddForce(Vector2.down * 3f, ForceMode2D.Impulse); // 살짝 떨어지도록
         }
 
-        yield return new WaitForSeconds(destroyDelay);
+        //  짧은 시간 후 자동 제거
+        StartCoroutine(DestroyAfterDelay(0.6f));
+    }
+
+
+    private IEnumerator DestroyAfterDelay(float delay = -1f)
+    {
+        if (delay < 0)
+            delay = remainTime;
+
+        yield return new WaitForSeconds(delay);
+        SafeDestroy();
+    }
+
+    private void SafeDestroy()
+    {
+        if (isDying)
+            return;
+
+        isDying = true;
         Destroy(gameObject);
     }
 }

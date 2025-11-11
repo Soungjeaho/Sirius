@@ -53,14 +53,14 @@ public class HeavyFloat : MonoBehaviour
         Vector2 mousePos = m_cam.ScreenToWorldPoint(Input.mousePosition);
         fireDirection = (mousePos - (Vector2)firePoint.position).normalized;
 
-        // --- Flip 판정 (플레이어 중심 기준) ---
+        // 플레이어 방향 전환
         if (mousePos.x < transform.position.x && facingRight)
         {
-            Flip(false); // 왼쪽 보기
+            Flip(false);
         }
         else if (mousePos.x > transform.position.x && !facingRight)
         {
-            Flip(true); // 오른쪽 보기
+            Flip(true);
         }
     }
 
@@ -80,7 +80,17 @@ public class HeavyFloat : MonoBehaviour
             return;
         }
 
+        // HeavyFloatProjectile 인스턴스 생성
         currentHook = Instantiate(heavyHookPrefab, firePoint.position, Quaternion.identity);
+
+        // FirePoint 주입 (핵심)
+        HeavyFloatProjectile projectile = currentHook.GetComponent<HeavyFloatProjectile>();
+        if (projectile != null)
+        {
+            projectile.SetFirePoint(firePoint);
+        }
+
+        // 발사 속도 부여
         Rigidbody2D hookRb = currentHook.GetComponent<Rigidbody2D>();
         if (hookRb != null)
         {
@@ -88,13 +98,13 @@ public class HeavyFloat : MonoBehaviour
             hookRb.constraints = RigidbodyConstraints2D.FreezeRotation;
         }
 
-        // 발사 시 플레이어 반동
+        // 플레이어 반동
         if (playerRb != null)
         {
             playerRb.AddForce(-fireDirection * recoilForce, ForceMode2D.Impulse);
         }
 
-        // 라인렌더 활성화
+        // 라인렌더러 표시
         if (lr != null)
         {
             lr.enabled = true;
@@ -114,11 +124,13 @@ public class HeavyFloat : MonoBehaviour
             {
                 Destroy(hook);
                 hook = null;
+
                 if (lr != null)
                 {
                     lr.enabled = false;
                     lr.positionCount = 0;
                 }
+
                 isFired = false;
                 yield break;
             }

@@ -12,6 +12,7 @@ TagManager:
   - Obstacle
   - PlayerAttack
   - BalancePlatform
+  - BalanceTilemap
   layers:
   - Default
   - TransparentFX
