@@ -27,11 +27,6 @@ public class HookCollision : MonoBehaviour
             if (enemyGrapple != null)
             {
                 enemyGrapple.StartGrapple(collision.gameObject);
-                Debug.Log($"[HookCollision] Enemy 감지 → Grapple 시작: {collision.name}");
-            }
-            else
-            {
-                Debug.LogWarning("[HookCollision] EnemyGrapple 컴포넌트를 찾을 수 없습니다. Player에 붙어 있는지 확인하세요!");
             }
 
             // 라인 연결용 위치 전달

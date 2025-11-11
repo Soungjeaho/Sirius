@@ -38,9 +38,16 @@ public class HeavyFloat : MonoBehaviour
     {
         AimAtMouse();
 
+        // 🔹 발사 (우클릭)
         if (Input.GetMouseButtonDown(1))
         {
             TryFireHeavy();
+        }
+
+        // 🔹 회수 (E키)
+        if (Input.GetKeyDown(KeyCode.E))
+        {
+            TryRecallHeavy();
         }
 
         UpdateLine();
@@ -74,20 +81,18 @@ public class HeavyFloat : MonoBehaviour
     private void TryFireHeavy()
     {
         if (isFired) return;
-        if (gauge == null || !gauge.UseGauge(gaugeCost))
-        {
-            Debug.Log("게이지 부족! 무거운 찌 발사 불가");
-            return;
-        }
+
+        // 🔹 게이지는 발사 시 소모하지 않음
 
         // HeavyFloatProjectile 인스턴스 생성
         currentHook = Instantiate(heavyHookPrefab, firePoint.position, Quaternion.identity);
 
-        // FirePoint 주입 (핵심)
+        // FirePoint 주입
         HeavyFloatProjectile projectile = currentHook.GetComponent<HeavyFloatProjectile>();
         if (projectile != null)
         {
             projectile.SetFirePoint(firePoint);
+            projectile.SetGaugeReference(gauge, gaugeCost); // ✅ 게이지 참조 전달 (적 충돌 시 차감)
         }
 
         // 발사 속도 부여
@@ -113,6 +118,28 @@ public class HeavyFloat : MonoBehaviour
 
         StartCoroutine(CheckDistanceCoroutine(currentHook, firePoint.position));
         isFired = true;
+    }
+
+    private void TryRecallHeavy()
+    {
+        if (!isFired || currentHook == null) return;
+
+        // 🔹 Switch 위에 있는 경우만 회수 허용
+        HeavyFloatProjectile projectile = currentHook.GetComponent<HeavyFloatProjectile>();
+        if (projectile != null && projectile.IsOnSwitch)
+        {
+            Destroy(currentHook);
+            currentHook = null;
+            isFired = false;
+
+            if (lr != null)
+            {
+                lr.enabled = false;
+                lr.positionCount = 0;
+            }
+
+            Debug.Log("E키 입력으로 찌 회수 완료");
+        }
     }
 
     private IEnumerator CheckDistanceCoroutine(GameObject hook, Vector2 startPos)

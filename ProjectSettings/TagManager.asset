@@ -13,6 +13,9 @@ TagManager:
   - PlayerAttack
   - BalancePlatform
   - BalanceTilemap
+  - CrackedTilemap
+  - HeavyProjectile
+  - Switch
   layers:
   - Default
   - TransparentFX
@@ -24,7 +27,7 @@ TagManager:
   - obstacleMask
   - Player
   - Hook
-  - 
+  - Swtich
   - 
   - 
   - 

@@ -1,22 +1,30 @@
 using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public class HeavyFloatProjectile : MonoBehaviour
 {
     [Header("기본 설정")]
     [SerializeField] private int damage = 2;
-    [SerializeField] private float knockbackForce = 8f;
+    [SerializeField] private float knockbackForce = 20f;
     [SerializeField] private float enemyDestroyDelay = 0.2f;
     [SerializeField] private float remainTime = 1.0f;
     [SerializeField] private float backDeleteDistance = 1.0f;
+
+    [Header("게이지 소모")]
+    private EnergyGauge gaugeRef;
+    private int gaugeCost = 0;
 
     private Transform firePoint;
     private Vector2 fireDir;
     private bool initialized = false;
     private bool isDying = false;
     private bool hasActivatedPlatform = false;
+    public bool IsOnSwitch { get; private set; } = false;
+
 
     private Rigidbody2D rb;
+    private HashSet<GameObject> damagedEnemies = new HashSet<GameObject>(); // ✅ 중복 피격 방지용
 
     private void Awake()
     {
@@ -25,7 +33,6 @@ public class HeavyFloatProjectile : MonoBehaviour
 
     private void Start()
     {
-        Rigidbody2D rb = GetComponent<Rigidbody2D>();
         if (rb != null)
         {
             rb.isKinematic = false;
@@ -66,27 +73,54 @@ public class HeavyFloatProjectile : MonoBehaviour
         }
     }
 
-    //  충돌 방식 변경 (Trigger → Collision)
     private void OnCollisionEnter2D(Collision2D collision)
     {
         if (isDying)
             return;
 
-        // Player 즉시 제거
+        //  Switch 충돌 감지
+        if (collision.collider.CompareTag("Switch"))
+        {
+            Rigidbody2D rb = GetComponent<Rigidbody2D>();
+            if (rb != null && rb.velocity.y <= 0)
+            {
+                Vector3 pos = transform.position;
+                pos.y = collision.collider.bounds.max.y + GetComponent<Collider2D>().bounds.extents.y;
+                transform.position = pos;
+                rb.velocity = Vector2.zero;
+            }
+
+            IsOnSwitch = true;
+            return;
+        }
+
+        // 이하 기존 코드 유지
+        if (collision.collider.CompareTag("CrackedTilemap"))
+        {
+            var cracked = collision.collider.GetComponent<CrackedTilemap>();
+            if (cracked != null)
+            {
+                Vector2 hitPoint = collision.contacts[0].point;
+                cracked.OnHeavyHit(hitPoint);
+            }
+            StartCoroutine(DestroyAfterDelay(enemyDestroyDelay));
+            return;
+        }
+
         if (collision.collider.CompareTag("Player"))
         {
             SafeDestroy();
             return;
         }
 
-        // Enemy 피격
         if (collision.collider.CompareTag("Enemy"))
         {
+            if (gaugeRef != null)
+                gaugeRef.UseGauge(gaugeCost);
             HandleEnemyHit(collision.collider);
             return;
         }
 
-        // BalancePlatform: 최초 1회만 작동
         if (collision.collider.CompareTag("BalancePlatform"))
         {
             if (!hasActivatedPlatform)
@@ -98,21 +132,6 @@ public class HeavyFloatProjectile : MonoBehaviour
             return;
         }
 
-        // BalanceTilemap
-        //if (collision.collider.CompareTag("BalanceTilemap"))
-        //{
-        //    var tilemap = collision.collider.GetComponent<BalanceTilemap>();
-        //    if (tilemap != null)
-        //    {
-        //        Vector2 hitPoint = collision.contacts[0].point;
-        //        Vector2 hitDir = ((Vector2)collision.collider.transform.position - (Vector2)transform.position).normalized;
-        //        tilemap.OnHeavyHit(hitDir, hitPoint);
-        //    }
-        //    StartCoroutine(DestroyAfterDelay());
-        //    return;
-        //}
-
-        // Ground / RB_Wall / Obstacle
         if (collision.collider.CompareTag("Ground") ||
             collision.collider.CompareTag("RB_Wall") ||
             collision.collider.CompareTag("Obstacle"))
@@ -123,17 +142,24 @@ public class HeavyFloatProjectile : MonoBehaviour
 
     private void HandleEnemyHit(Collider2D enemyCol)
     {
-        EnemyHealth enemy = enemyCol.GetComponent<EnemyHealth>();
+        GameObject enemyObj = enemyCol.gameObject;
+
+        //  이미 처리한 적이면 리턴 (중복 방지)
+        if (damagedEnemies.Contains(enemyObj))
+            return;
+
+        damagedEnemies.Add(enemyObj);
+
+        EnemyHealth enemy = enemyObj.GetComponent<EnemyHealth>();
         if (enemy != null)
-        {
             enemy.TakeDamage(damage);
 
-            Rigidbody2D enemyRb = enemyCol.GetComponent<Rigidbody2D>();
-            if (enemyRb != null)
-            {
-                Vector2 dir = (enemyCol.transform.position - transform.position).normalized;
-                enemyRb.AddForce(dir * knockbackForce, ForceMode2D.Impulse);
-            }
+        Rigidbody2D enemyRb = enemyObj.GetComponent<Rigidbody2D>();
+        if (enemyRb != null)
+        {
+            Vector2 dir = (enemyObj.transform.position - transform.position).normalized;
+            enemyRb.velocity = Vector2.zero; // 기존 속도 초기화
+            enemyRb.AddForce(dir * knockbackForce, ForceMode2D.Impulse);
         }
 
         StartCoroutine(DestroyAfterDelay(enemyDestroyDelay));
@@ -150,16 +176,20 @@ public class HeavyFloatProjectile : MonoBehaviour
 
         platform.OnHeavyHit(hitDir, hitPoint);
 
-        //  살짝 아래로 반발시켜 멈춤 방지
         Rigidbody2D rb = GetComponent<Rigidbody2D>();
         if (rb != null)
         {
-            rb.velocity = Vector2.zero; // 충돌 순간 정지 방지용
-            rb.AddForce(Vector2.down * 3f, ForceMode2D.Impulse); // 살짝 떨어지도록
+            rb.velocity = Vector2.zero;
+            rb.AddForce(Vector2.down * 3f, ForceMode2D.Impulse);
         }
 
-        //  짧은 시간 후 자동 제거
         StartCoroutine(DestroyAfterDelay(0.6f));
+    }
+
+    public void SetGaugeReference(EnergyGauge gauge, int cost)
+    {
+        gaugeRef = gauge;
+        gaugeCost = cost;
     }
 
 

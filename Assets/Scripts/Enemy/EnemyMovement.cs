@@ -41,8 +41,10 @@ public class EnemyMovement : MonoBehaviour
     private void Flip()
     {
         moveRight = !moveRight;
-        Vector3 localScale = transform.localScale;
-        localScale.x *= -1f;
-        transform.localScale = localScale;
+
+        // 현재 회전값을 가져와서 Y축 기준으로 180도 회전
+        Quaternion rotation = transform.rotation;
+        rotation = Quaternion.Euler(0f, moveRight ? 0f : 180f, 0f);
+        transform.rotation = rotation;
     }
 }
