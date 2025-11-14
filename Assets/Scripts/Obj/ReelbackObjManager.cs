@@ -24,4 +24,9 @@ public class ReelBackObjManager : MonoBehaviour
             tagChanged = true;
         }
     }
+
+    public Transform GetVolume()
+    {
+        return volume;
+    }
 }
