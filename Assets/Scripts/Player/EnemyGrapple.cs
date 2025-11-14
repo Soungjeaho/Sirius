@@ -25,9 +25,6 @@ public class EnemyGrapple : MonoBehaviour
         EnemyMovement em = enemy.GetComponent<EnemyMovement>();
         if (em != null) em.enabled = false;
 
-        RangedAttackVision ra = enemy.GetComponent<RangedAttackVision>();
-        if (ra != null) ra.enabled = false;
-
         Rigidbody2D rb = enemy.GetComponent<Rigidbody2D>();
         if (rb != null)
         {
