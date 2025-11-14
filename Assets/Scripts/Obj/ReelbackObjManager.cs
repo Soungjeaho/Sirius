@@ -21,20 +21,6 @@ public class ReelBackObjManager : MonoBehaviour
         if (Vector2.Distance(block.position, volume.position) <= reachThreshold)
         {
             block.gameObject.tag = "Obstacle";
-            // Collider를 static으로 변경(isTrigger 비활성화)
-            Collider2D col = block.GetComponent<Collider2D>();
-
-            if (col != null)
-            {
-                col.isTrigger = false;
-            }
-
-            // Rigidbody가 있다면 움직임 고정
-            Rigidbody2D rb = block.GetComponent<Rigidbody2D>();
-            if (rb != null)
-            {
-                rb.bodyType = RigidbodyType2D.Static;
-            }
             tagChanged = true;
         }
     }

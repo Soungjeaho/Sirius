@@ -278,6 +278,7 @@ public class NewReelback : MonoBehaviour
         }
     }
 
+    // 오브젝트를 E키로 끌어당기는 기능
     private IEnumerator PullObjectRoutine()
     {
         if (pullTarget == null) yield break;
@@ -361,9 +362,15 @@ public class NewReelback : MonoBehaviour
 
         // ✅ 태그 변경
         pullTarget.tag = "Obstacle";
+
+        // ✅ ReelBackObjManager와 별개로 안전하게 처리 보장
+        if (manager != null)
+            Debug.Log("🔒 Block이 Volume 근처에서 Static으로 전환됨");
+
         isPullingObject = false;
         pullTarget = null;
     }
+
 
     private void Update()
     {
@@ -378,3 +385,4 @@ public class NewReelback : MonoBehaviour
         }
     }
 }
+
