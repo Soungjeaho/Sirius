@@ -1,9 +1,5 @@
 fileFormatVersion: 2
-<<<<<<<< HEAD:Assets/Scripts/NPC/Core/EnemyBase.cs.meta
 guid: 1df105338ff9f204da0623dbb69c9df8
-========
-guid: 1b0ac4a0d7676294a896e10d8e667b72
->>>>>>>> cb29f6eaf47bb3b9465d604410880c0febd19aa1:Assets/Scripts/NPC/Core/DamageDealer2D.cs.meta
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2

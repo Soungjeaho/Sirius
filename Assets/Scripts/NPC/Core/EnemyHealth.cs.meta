@@ -1,9 +1,5 @@
 fileFormatVersion: 2
-<<<<<<<< HEAD:Assets/Scripts/NPC/Core/EnemyHealth.cs.meta
 guid: 49f2a1971d2b43145aec2b0f90800a85
-========
-guid: 95e4587099cffed45967acf7bc59371b
->>>>>>>> cb29f6eaf47bb3b9465d604410880c0febd19aa1:Assets/Scripts/NPC/Core/AnimParams.cs.meta
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2

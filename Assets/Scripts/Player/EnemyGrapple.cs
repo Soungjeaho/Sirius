@@ -105,43 +105,22 @@ public class EnemyGrapple : MonoBehaviour
 
     public void StartGrapple(GameObject enemy)
     {
-        if (isPullingEnemy || enemy == null)
-            return;
+        if (isPullingEnemy || enemy == null) return;
 
-<<<<<<< HEAD
         // 1) 에너지 확인
         if (!gauge || !gauge.UseGauge(gaugeCost))
-=======
-        if (!gauge.UseGauge(gaugeCost))
->>>>>>> cb29f6eaf47bb3b9465d604410880c0febd19aa1
         {
             Debug.Log("Energy 부족! (또는 gauge 미할당)");
             return;
         }
 
-<<<<<<< HEAD
         // 2) 적 잠금(이동/시야/애니/물리)
         _lock = new LockedEnemy(enemy);
         _lock.Lock();
-=======
-        EnemyMovement em = enemy.GetComponent<EnemyMovement>();
-        if (em != null) em.enabled = false;
-
-        Rigidbody2D rb = enemy.GetComponent<Rigidbody2D>();
-        if (rb != null)
-        {
-            rb.velocity = Vector2.zero;
-            rb.isKinematic = true;
-        }
->>>>>>> cb29f6eaf47bb3b9465d604410880c0febd19aa1
 
         // 3) 상태 플래그
         isPullingEnemy = true;
-<<<<<<< HEAD
         if (reelback) reelback.isEnemyBeingGrappled = true; // LR/입력 상호작용 방지
-=======
-        reelback.isEnemyBeingGrappled = true;
->>>>>>> cb29f6eaf47bb3b9465d604410880c0febd19aa1
 
         // 4) 끌어오기 코루틴
         StartCoroutine(PullEnemyCoroutine(enemy));
@@ -149,7 +128,6 @@ public class EnemyGrapple : MonoBehaviour
 
     private IEnumerator PullEnemyCoroutine(GameObject enemy)
     {
-<<<<<<< HEAD
         if (!reelback)
         {
             Debug.LogWarning("reelback 미할당");
@@ -157,9 +135,6 @@ public class EnemyGrapple : MonoBehaviour
         }
 
         Transform enemyTransform = enemy ? enemy.transform : null;
-=======
-        Rigidbody2D enemyRb = enemy.GetComponent<Rigidbody2D>();
->>>>>>> cb29f6eaf47bb3b9465d604410880c0febd19aa1
         Transform playerTransform = reelback.FirePoint;
 
         // 라인렌더러 초기화
@@ -169,7 +144,6 @@ public class EnemyGrapple : MonoBehaviour
             reelback.lr.positionCount = 2;
         }
 
-<<<<<<< HEAD
         // 적이 존재하고, 플레이어 FirePoint에 도달할 때까지
         while (enemyTransform && playerTransform && !HasReachedFirePoint(enemyTransform, playerTransform))
         {
@@ -182,42 +156,13 @@ public class EnemyGrapple : MonoBehaviour
             if (reelback.lr != null)
             {
                 reelback.lr.positionCount = 2;
-=======
-        if (enemyRb != null)
-        {
-            enemyRb.isKinematic = false;
-            enemyRb.gravityScale = 0f;
-            enemyRb.velocity = Vector2.zero;
-        }
-
-        while (!HasTouchedPlayer(enemy.transform))
-        {
-            if (enemyRb != null)
-            {
-                // 플레이어와 Enemy의 거리 방향 벡터 계산
-                Vector2 dir = ((Vector2)playerTransform.position - enemyRb.position).normalized;
-                enemyRb.velocity = dir * grappleSpeed;  // 속도를 직접 적용
-            }
-            else
-            {
-                enemy.transform.position = Vector2.MoveTowards(
-                    enemy.transform.position,
-                    playerTransform.position,
-                    grappleSpeed * Time.deltaTime
-                );
-            }
-
-            if (reelback.lr != null)
-            {
->>>>>>> cb29f6eaf47bb3b9465d604410880c0febd19aa1
                 reelback.lr.SetPosition(0, playerTransform.position);
-                reelback.lr.SetPosition(1, enemy.transform.position);
+                reelback.lr.SetPosition(1, enemyTransform.position);
             }
 
-            yield return new WaitForFixedUpdate();
+            yield return null;
         }
 
-<<<<<<< HEAD
         // 잠깐 연출 대기
         yield return new WaitForSeconds(disappearDelay);
 
@@ -228,33 +173,16 @@ public class EnemyGrapple : MonoBehaviour
         if (gauge) gauge.AddGauge(1);
 
         // 라인렌더러 닫기
-=======
-        // 닿은 후 잠시 유지
-        yield return new WaitForSeconds(disappearDelay);
-
-        gauge.AddGauge(1);
-        Destroy(enemy);
-
-        // Grapple 종료 처리
->>>>>>> cb29f6eaf47bb3b9465d604410880c0febd19aa1
         if (reelback.lr != null)
         {
             reelback.lr.enabled = false;
             reelback.lr.positionCount = 0;
         }
 
-<<<<<<< HEAD
         // 상태 해제
         if (reelback) reelback.isEnemyBeingGrappled = false;
-=======
-        reelback.ResetHookState();
-        reelback.StopAllCoroutines();
-
-        reelback.isEnemyBeingGrappled = false;
->>>>>>> cb29f6eaf47bb3b9465d604410880c0febd19aa1
         isPullingEnemy = false;
 
-<<<<<<< HEAD
         // 적을 살려두는 설계로 바꾸고 싶다면:
         // if (_lock != null) _lock.Unlock();
         _lock = null;
@@ -284,17 +212,5 @@ public class EnemyGrapple : MonoBehaviour
         // 적 원복
         if (_lock != null) _lock.Unlock();
         _lock = null;
-=======
-    private bool HasTouchedPlayer(Transform enemy)
-    {
-        GameObject player = GameObject.FindWithTag("Player");
-        if (player == null) return false;
-
-        Collider2D enemyCol = enemy.GetComponent<Collider2D>();
-        Collider2D playerCol = player.GetComponent<Collider2D>();
-        if (enemyCol == null || playerCol == null) return false;
-
-        return enemyCol.IsTouching(playerCol);
->>>>>>> cb29f6eaf47bb3b9465d604410880c0febd19aa1
     }
 }

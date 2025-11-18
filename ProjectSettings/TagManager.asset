@@ -4,16 +4,12 @@
 TagManager:
   serializedVersion: 2
   tags:
-  - BalanceTilemap
-  - Enemy
-  - Obstacle
-  - Switch
-  - BalancePlatform
-  - HeavyProjectile
   - Ground
-  - RB_Wall
-  - CrackedTilemap
   - Reelbackable
+  - Enemy
+  - RB_Wall
+  - Wall
+  - Obstacle
   layers:
   - Default
   - TransparentFX
@@ -21,14 +17,10 @@ TagManager:
   - Ground
   - Water
   - UI
+  - Reelbackable
+  - obstacleMask
   - Player
-<<<<<<< HEAD
   - Enemy
-=======
-  - Fising Rod
-  - 
-  - 
->>>>>>> cb29f6eaf47bb3b9465d604410880c0febd19aa1
   - 
   - 
   - 

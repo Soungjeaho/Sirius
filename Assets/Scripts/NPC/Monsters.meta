@@ -1,9 +1,5 @@
 fileFormatVersion: 2
-<<<<<<<< HEAD:Assets/Scripts/NPC/Monsters.meta
 guid: 67d01ebecea770341a87ce262ef9f274
-========
-guid: f3e2f2729622d7a439abd41596f1e0c8
->>>>>>>> cb29f6eaf47bb3b9465d604410880c0febd19aa1:Assets/Scripts/NPC/Core.meta
 folderAsset: yes
 DefaultImporter:
   externalObjects: {}
