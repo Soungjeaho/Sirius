@@ -204,7 +204,7 @@ MonoBehaviour:
   groundCheckRadius: 0.2
   whatIsGround:
     serializedVersion: 2
-    m_Bits: 8
+    m_Bits: 0
   attackDelay: 0.5
   attackMinDistance: 0.5
   attackMaxDistance: 2
@@ -233,6 +233,7 @@ MonoBehaviour:
   rb: {fileID: 3659553148049130352}
   normalHookPrefab: {fileID: 7573530713224063984, guid: ad6aea8c0a5b2d84ca95a59319d10297, type: 3}
   isEnemyBeingGrappled: 0
+  pullSpeed: 5
 --- !u!114 &7760784013090669995
 MonoBehaviour:
   m_ObjectHideFlags: 0
