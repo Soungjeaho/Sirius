@@ -3,6 +3,7 @@ using UnityEngine;
 public class HookCollision : MonoBehaviour
 {
     private NewReelback reelback;
+    private bool hasHit = false;
 
     public void Init(NewReelback rb)
     {
@@ -11,22 +12,70 @@ public class HookCollision : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (reelback == null) return;
+        if (hasHit || reelback == null)
+            return;
 
-        Vector2 hitPos = collision.ClosestPoint(transform.position); // 충돌 지점 계산
+        hasHit = true;
 
+        Vector2 hitPos = collision.ClosestPoint(transform.position);
+
+        //  1. Enemy 충돌
         if (collision.CompareTag("Enemy"))
         {
-            reelback.OnHookHit(collision.tag, hitPos);
-            collision.isTrigger = true;
+            //  EnemyGrapple을 찾아서 StartGrapple 실행
+            EnemyGrapple enemyGrapple = reelback.GetComponent<EnemyGrapple>();
+            if (enemyGrapple != null)
+            {
+                enemyGrapple.StartGrapple(collision.gameObject);
+            }
+
+            // 라인 연결용 위치 전달
+            reelback.OnHookHit("Enemy", hitPos);
+
+            // Hook은 제거하되, Grapple이 진행 중이므로 라인은 유지
+            Destroy(gameObject, 0.05f);
+            return;
         }
+
+        //  2. 당길 수 있는 오브젝트
         else if (collision.CompareTag("Reelbackable"))
         {
-            reelback.OnHookHit(collision.tag, collision.ClosestPoint(transform.position));
+            reelback.OnHookHit("Reelbackable", hitPos);
+            Destroy(gameObject, 0.05f);
+            return;
         }
+
+        //  3. 릴백용 벽 (매달리기)
         else if (collision.CompareTag("RB_Wall"))
         {
-            reelback.OnHookHit(collision.tag, hitPos); // 태그 + 위치 전달
+            reelback.OnHookHit("RB_Wall", hitPos);
+            Destroy(gameObject, 0.05f);
+            return;
+        }
+
+        //  4. 일반 지면 / 장애물
+        else if (collision.CompareTag("Ground") || collision.CompareTag("Obstacle"))
+        {
+            Destroy(gameObject);
+
+            if (reelback.lr != null)
+            {
+                reelback.lr.enabled = false;
+                reelback.lr.positionCount = 0;
+            }
+
+            return;
+        }
+
+        //  5. 그 외 충돌 (기타 오브젝트)
+        else
+        {
+            Destroy(gameObject);
+            if (reelback.lr != null)
+            {
+                reelback.lr.enabled = false;
+                reelback.lr.positionCount = 0;
+            }
         }
     }
 }

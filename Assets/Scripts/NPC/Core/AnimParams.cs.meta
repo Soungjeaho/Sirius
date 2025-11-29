@@ -1,5 +1,9 @@
 fileFormatVersion: 2
+<<<<<<<< HEAD:Assets/Scripts/NPC/Core/AnimParams.cs.meta
 guid: 95e4587099cffed45967acf7bc59371b
+========
+guid: 1df105338ff9f204da0623dbb69c9df8
+>>>>>>>> cb29f6eaf47bb3b9465d604410880c0febd19aa1:Assets/Scripts/NPC/Core/EnemyBase.cs.meta
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2

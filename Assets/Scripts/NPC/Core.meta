@@ -1,5 +1,9 @@
 fileFormatVersion: 2
+<<<<<<<< HEAD:Assets/Scripts/NPC/Core.meta
 guid: f3e2f2729622d7a439abd41596f1e0c8
+========
+guid: 25fb164741b4b5e4f8d3c3f422e913bf
+>>>>>>>> cb29f6eaf47bb3b9465d604410880c0febd19aa1:Assets/Scripts/NPC.meta
 folderAsset: yes
 DefaultImporter:
   externalObjects: {}

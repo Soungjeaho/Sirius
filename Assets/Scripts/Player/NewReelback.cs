@@ -1,29 +1,33 @@
-using System.Collections;
 using UnityEngine;
+using System.Collections;
 
 public class NewReelback : MonoBehaviour
 {
-    [SerializeField] GameObject HookPrefab = null;
-    [SerializeField] SpriteRenderer playerSprite = null;
-    [SerializeField] float maxDistance = 10f;
-    [SerializeField] float hookSpeed = 20f;
+    [Header("공통 설정")]
+    [SerializeField] private SpriteRenderer playerSprite = null;
+    [SerializeField] private float maxDistance = 10f;
+    [SerializeField] private float hookSpeed = 20f;
     [SerializeField] public Transform FirePoint = null;
     [SerializeField] public LineRenderer lr = null;
-    [SerializeField] Rigidbody2D rb = null;
+    [SerializeField] private Rigidbody2D rb = null;
+
+    [Header("일반 찌 프리팹 설정")]
+    [SerializeField] private GameObject normalHookPrefab = null;
+
     [HideInInspector] public bool isEnemyBeingGrappled = false;
 
     private Vector2 FireDirection;
-    Camera m_cam = null;
-    bool facingRight = true;
-    GameObject currentHook = null;
+    private Camera m_cam = null;
+    private bool facingRight = true;
+    private GameObject currentHook = null;
 
-    bool hookTriggered = false;
-    Vector2 fixedHookPosition;
+    private bool hookTriggered = false;
+    private Vector2 fixedHookPosition;
 
     [Header("Reelbackable 당기기 관련")]
     private GameObject pullTarget = null;
     private bool isPullingObject = false;
-    private float pullSpeed = 5f;
+    [SerializeField] private float pullSpeed = 5f; // ✅ 당기는 속도
 
     public bool IsGrappling { get; private set; } = false;
 
@@ -46,29 +50,37 @@ public class NewReelback : MonoBehaviour
 
     private void LookAtMouse()
     {
-        Vector2 mousePos = m_cam.ScreenToWorldPoint(Input.mousePosition);
+        if (m_cam == null || FirePoint == null)
+            return;
 
-        if (mousePos.x < transform.position.x && facingRight)
-            Flip();
-        else if (mousePos.x > transform.position.x && !facingRight)
-            Flip();
+        Vector3 mouseWorld = m_cam.ScreenToWorldPoint(Input.mousePosition);
+        mouseWorld.z = 0f;
 
+        Vector2 mousePos = mouseWorld;
         FireDirection = (mousePos - (Vector2)FirePoint.position).normalized;
+
+        if (mousePos.x < FirePoint.position.x && facingRight)
+            Flip(false);
+        else if (mousePos.x > FirePoint.position.x && !facingRight)
+            Flip(true);
     }
 
-    private void Flip()
+    private void Flip(bool faceRight)
     {
-        facingRight = !facingRight;
-        Quaternion Rotation = playerSprite.transform.localRotation;
-        Rotation.y += 180;
-        playerSprite.transform.localRotation = Rotation;
+        facingRight = faceRight;
+        float yRotation = facingRight ? 0f : 180f;
+        transform.rotation = Quaternion.Euler(0, yRotation, 0);
     }
 
     private void TryFire()
     {
+        if (IsGrappling)
+            return;
+
         if (Input.GetMouseButtonDown(1) && currentHook == null)
         {
-            currentHook = Instantiate(HookPrefab, FirePoint.position, Quaternion.identity);
+            currentHook = Instantiate(normalHookPrefab, FirePoint.position, Quaternion.identity);
+
             Rigidbody2D hookRb = currentHook.GetComponent<Rigidbody2D>();
             if (hookRb != null)
             {
@@ -79,7 +91,6 @@ public class NewReelback : MonoBehaviour
             HookCollision hookCol = currentHook.AddComponent<HookCollision>();
             hookCol.Init(this);
 
-            // 발사 직후 LR 활성화
             if (lr != null)
             {
                 lr.enabled = true;
@@ -89,11 +100,15 @@ public class NewReelback : MonoBehaviour
             StartCoroutine(CheckHookDistanceCoroutine(currentHook, FirePoint.position));
         }
     }
+
     private IEnumerator CheckHookDistanceCoroutine(GameObject hook, Vector2 startPos)
     {
+        yield return null;
+
         while (hook != null)
         {
             float distance = Vector2.Distance(startPos, hook.transform.position);
+
             if (distance > maxDistance)
             {
                 Destroy(hook);
@@ -114,33 +129,32 @@ public class NewReelback : MonoBehaviour
 
     public void OnHookHit(string tag, Vector2 hitPos)
     {
-        hookTriggered = true;
-        fixedHookPosition = hitPos;
-
         if (currentHook != null)
         {
             Destroy(currentHook);
             currentHook = null;
         }
 
+        if (tag == "Enemy")
+        {
+            return;
+        }
+
         if (tag == "RB_Wall")
         {
+            hookTriggered = true;
+            fixedHookPosition = hitPos;
+
             StopAllCoroutines();
             StartCoroutine(SnapPlayerToWall(hitPos));
         }
         else if (tag == "Reelbackable")
         {
+            hookTriggered = true;
+            fixedHookPosition = hitPos;
+
+            // ✅ 맞은 오브젝트를 pullTarget으로 지정
             pullTarget = GameObject.FindWithTag("Reelbackable");
-        }
-        else if (tag == "Enemy")
-        {
-            EnemyGrapple eg = FindObjectOfType<EnemyGrapple>();
-            if (eg != null)
-            {
-                isEnemyBeingGrappled = true;
-                hookTriggered = false;
-                eg.StartGrapple(GameObject.FindWithTag("Enemy"));
-            }
         }
     }
 
@@ -200,7 +214,7 @@ public class NewReelback : MonoBehaviour
             Rigidbody2D rb = player.GetComponent<Rigidbody2D>();
             if (rb != null)
             {
-                rb.gravityScale = 2f;
+                rb.gravityScale = 1f;
                 rb.constraints = RigidbodyConstraints2D.FreezeRotation;
             }
         }
@@ -215,9 +229,25 @@ public class NewReelback : MonoBehaviour
         }
     }
 
+    public void ResetHookState()
+    {
+        hookTriggered = false;
+
+        if (lr != null)
+        {
+            lr.enabled = false;
+            lr.positionCount = 0;
+        }
+    }
+
     private void UpdateLine()
     {
-        if (currentHook != null) // Hook이 존재하면 항상 LR 따라가기
+        if (isEnemyBeingGrappled)
+        {
+            return;
+        }
+
+        if (currentHook != null)
         {
             if (lr != null)
             {
@@ -232,6 +262,7 @@ public class NewReelback : MonoBehaviour
         {
             if (lr != null)
             {
+                lr.enabled = true;
                 lr.positionCount = 2;
                 lr.SetPosition(0, FirePoint.position);
                 lr.SetPosition(1, fixedHookPosition);
@@ -247,47 +278,111 @@ public class NewReelback : MonoBehaviour
         }
     }
 
-    private void HandlePullObject()
+    // 오브젝트를 E키로 끌어당기는 기능
+    private IEnumerator PullObjectRoutine()
     {
-        if (pullTarget != null && !isPullingObject)
+        if (pullTarget == null) yield break;
+        isPullingObject = true;
+
+        Rigidbody2D targetRb = pullTarget.GetComponent<Rigidbody2D>();
+        Collider2D targetCol = pullTarget.GetComponent<Collider2D>();
+
+        // 🔹 이동 전 설정
+        if (targetRb != null)
         {
-            if (Input.GetKeyDown(KeyCode.E))
-            {
-                isPullingObject = true;
-                hookTriggered = false;
-
-                Vector2 playerPos = FirePoint.position;
-                Vector2 objPos = pullTarget.transform.position;
-                Vector2 targetPos = objPos + (playerPos - objPos) * 0.5f;
-
-                StartCoroutine(PullObjectCoroutine(pullTarget, targetPos));
-            }
+            targetRb.bodyType = RigidbodyType2D.Dynamic;
+            targetRb.gravityScale = 0f;
+            targetRb.velocity = Vector2.zero;
         }
-    }
 
-    private IEnumerator PullObjectCoroutine(GameObject obj, Vector2 targetPos)
-    {
-        while (Vector2.Distance(obj.transform.position, targetPos) > 0.01f)
+        // ✅ ReelBackObjManager에서 volume 위치 가져오기
+        ReelBackObjManager manager = FindObjectOfType<ReelBackObjManager>();
+        Vector3 targetPos = (manager != null)
+            ? manager.GetVolume().position
+            : FirePoint.position;
+
+        // ✅ Y좌표 고정 (수평 이동)
+        targetPos.y = pullTarget.transform.position.y;
+
+        // ✅ LineRenderer 초기화
+        if (lr != null)
         {
-            obj.transform.position = Vector2.MoveTowards(obj.transform.position, targetPos, pullSpeed * Time.deltaTime);
+            lr.enabled = true;
+            lr.positionCount = 2;
+        }
+
+        // ✅ 일정 속도로 X축 이동
+        while (pullTarget != null)
+        {
+            float dist = Mathf.Abs(pullTarget.transform.position.x - targetPos.x);
+            if (dist <= 0.05f)
+                break;
+
+            // X축 방향 계산
+            Vector2 dir = new Vector2(Mathf.Sign(targetPos.x - pullTarget.transform.position.x), 0f);
+            Vector2 moveStep = dir * pullSpeed * Time.deltaTime;
+
+            if (targetRb != null && targetRb.bodyType == RigidbodyType2D.Dynamic)
+                targetRb.MovePosition(targetRb.position + moveStep);
+            else
+                pullTarget.transform.position += (Vector3)moveStep;
+
+            // ✅ LineRenderer 갱신
+            if (lr != null)
+            {
+                lr.SetPosition(0, FirePoint.position);
+                lr.SetPosition(1, pullTarget.transform.position);
+            }
+
             yield return null;
         }
 
-        isPullingObject = false;
-        pullTarget = null;
-
+        // ✅ 도착 즉시 LineRenderer 비활성화
         if (lr != null)
         {
             lr.enabled = false;
             lr.positionCount = 0;
         }
+
+        // ✅ Grapple 상태 초기화
+        hookTriggered = false;
+        fixedHookPosition = Vector2.zero;
+
+        // ✅ 도착 후 오브젝트 고정 (Static으로 복구)
+        if (targetRb != null)
+        {
+            targetRb.velocity = Vector2.zero;
+            targetRb.gravityScale = 1f;
+            targetRb.bodyType = RigidbodyType2D.Static;
+        }
+
+        // ✅ Collider 복원
+        if (targetCol != null)
+            targetCol.isTrigger = false;
+
+        // ✅ 태그 변경
+        pullTarget.tag = "Obstacle";
+
+        // ✅ ReelBackObjManager와 별개로 안전하게 처리 보장
+        if (manager != null)
+            Debug.Log("🔒 Block이 Volume 근처에서 Static으로 전환됨");
+
+        isPullingObject = false;
+        pullTarget = null;
     }
+
 
     private void Update()
     {
         LookAtMouse();
         TryFire();
         UpdateLine();
-        HandlePullObject();
+
+        // ✅ E키로 오브젝트 당기기 시작
+        if (Input.GetKeyDown(KeyCode.E) && pullTarget != null && !isPullingObject)
+        {
+            StartCoroutine(PullObjectRoutine());
+        }
     }
 }
+

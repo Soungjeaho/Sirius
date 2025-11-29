@@ -3,11 +3,13 @@ using UnityEngine.UI;
 
 public class EnergyGauge : MonoBehaviour
 {
-    [SerializeField] private int maxGauge = 10;
+    [SerializeField] private int maxGauge = 12;
     [SerializeField] private int currentGauge = 0;
 
     [Header("UI References")]
     [SerializeField] private Image[] gaugeBlocks;
+
+    public int CurrentGauge => currentGauge;
 
     private void Start()
     {
@@ -72,7 +74,7 @@ public class EnergyGauge : MonoBehaviour
         }
         else if (Input.GetKeyDown(KeyCode.Alpha3))
         {
-            AddGauge(10);
+            AddGauge(12);
         }
     }
 }
