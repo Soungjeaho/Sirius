@@ -171,6 +171,7 @@ Transform:
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 <<<<<<< HEAD
+<<<<<<< HEAD
 --- !u!1 &263777616
 GameObject:
   m_ObjectHideFlags: 0
@@ -210,6 +211,8 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
 =======
+=======
+>>>>>>> parent of 413965e (25.11.11)
 --- !u!4 &519420032 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 1875563653794130921, guid: 936cfcf24ebaa80499a63cf5274770fa, type: 3}
@@ -376,6 +379,7 @@ PrefabInstance:
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 35eeeb2c2389b114da7d132d7bc74448, type: 3}
 <<<<<<< HEAD
+<<<<<<< HEAD
 --- !u!4 &736076770 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 7205825393993519045, guid: f21018e220dcf184382f39c964b7acad, type: 3}
@@ -390,6 +394,9 @@ Transform:
 =======
 --- !u!1001 &141369329253757771
 >>>>>>> parent of 413965e (25.11.11)
+=======
+--- !u!1001 &141369329253757771
+>>>>>>> parent of 413965e (25.11.11)
 PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
@@ -397,6 +404,7 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+<<<<<<< HEAD
 <<<<<<< HEAD
     - target: {fileID: -6784362706647379260, guid: 1178bed9895366a469ffe493621d04c8, type: 3}
       propertyPath: maxDistance
@@ -467,6 +475,8 @@ PrefabInstance:
       value: 8
       objectReference: {fileID: 0}
 =======
+=======
+>>>>>>> parent of 413965e (25.11.11)
     - target: {fileID: 2048395734233959724, guid: f5aec3790dd11ce4484faa8ccf3799e2, type: 3}
       propertyPath: m_Name
       value: AxeHuman
@@ -511,11 +521,15 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+<<<<<<< HEAD
+>>>>>>> parent of 413965e (25.11.11)
+=======
 >>>>>>> parent of 413965e (25.11.11)
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []
+<<<<<<< HEAD
 <<<<<<< HEAD
   m_SourcePrefab: {fileID: 100100000, guid: 1178bed9895366a469ffe493621d04c8, type: 3}
 --- !u!4 &1418138555 stripped
@@ -8587,6 +8601,8 @@ Grid:
   m_CellSwizzle: 0
 --- !u!1001 &2080114012
 =======
+=======
+>>>>>>> parent of 413965e (25.11.11)
   m_SourcePrefab: {fileID: 100100000, guid: f5aec3790dd11ce4484faa8ccf3799e2, type: 3}
 --- !u!1001 &3345861869758798990
 >>>>>>> parent of 413965e (25.11.11)
@@ -8768,6 +8784,7 @@ PrefabInstance:
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []
+<<<<<<< HEAD
 <<<<<<< HEAD
   m_SourcePrefab: {fileID: 100100000, guid: dd70f840637664c4b918fa452814cab2, type: 3}
 --- !u!1001 &3725120031954545708
@@ -9110,6 +9127,9 @@ PrefabInstance:
 =======
   m_SourcePrefab: {fileID: 100100000, guid: 936cfcf24ebaa80499a63cf5274770fa, type: 3}
 >>>>>>> parent of 413965e (25.11.11)
+=======
+  m_SourcePrefab: {fileID: 100100000, guid: 936cfcf24ebaa80499a63cf5274770fa, type: 3}
+>>>>>>> parent of 413965e (25.11.11)
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -9119,7 +9139,11 @@ SceneRoots:
   - {fileID: 1129678879}
   - {fileID: 250051445}
 <<<<<<< HEAD
+<<<<<<< HEAD
   - {fileID: 3725120031954545708}
+=======
+  - {fileID: 141369329253757771}
+>>>>>>> parent of 413965e (25.11.11)
 =======
   - {fileID: 141369329253757771}
 >>>>>>> parent of 413965e (25.11.11)
