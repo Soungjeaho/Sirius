@@ -122,16 +122,6 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
---- !u!4 &318651570 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 886858066480421441, guid: 5f66d9f03b2cf3a418e4050125d9a578, type: 3}
-  m_PrefabInstance: {fileID: 5979967088945240338}
-  m_PrefabAsset: {fileID: 0}
---- !u!95 &318651572 stripped
-Animator:
-  m_CorrespondingSourceObject: {fileID: 5484276516038072575, guid: 5f66d9f03b2cf3a418e4050125d9a578, type: 3}
-  m_PrefabInstance: {fileID: 5979967088945240338}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &331478114
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -497,8 +487,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 45f684a2ace5e1c43b5d8f6b1933f511, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  followSpeed: 0.1
-  offset: {x: 0, y: 3, z: -10}
 --- !u!1001 &1578509597
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -637,14 +625,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: SwordHuman
       objectReference: {fileID: 0}
-    - target: {fileID: 2758718346588434289, guid: 5f66d9f03b2cf3a418e4050125d9a578, type: 3}
-      propertyPath: anim
-      value: 
-      objectReference: {fileID: 318651572}
-    - target: {fileID: 2758718346588434289, guid: 5f66d9f03b2cf3a418e4050125d9a578, type: 3}
-      propertyPath: gfxRoot
-      value: 
-      objectReference: {fileID: 318651570}
     - target: {fileID: 5022466439133900848, guid: 5f66d9f03b2cf3a418e4050125d9a578, type: 3}
       propertyPath: m_LocalPosition.x
       value: -1.600576
@@ -684,10 +664,6 @@ PrefabInstance:
     - target: {fileID: 5022466439133900848, guid: 5f66d9f03b2cf3a418e4050125d9a578, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 9094881897761025388, guid: 5f66d9f03b2cf3a418e4050125d9a578, type: 3}
-      propertyPath: m_FlipX
-      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

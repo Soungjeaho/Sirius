@@ -4,11 +4,12 @@ namespace Project.Combat
 {
     public class PlayerHealth : MonoBehaviour, IDamageable
     {
-        public int maxHP = 5;
+        [Header("Player HP")]
+        public int maxHP = 10;
         public int currentHP;
-        public bool invincible;
-        public float hurtCooldown = 0.3f;
-        private float _lastHurt;
+
+        [Header("Death")]
+        public bool destroyOnDeath = false;
 
         public bool IsDead => currentHP <= 0;
 
@@ -19,16 +20,23 @@ namespace Project.Combat
 
         public void ApplyDamage(int amount, Vector2 hitPoint, Vector2 hitNormal, Object source = null)
         {
-            if (invincible || IsDead) return;
-            if (Time.time - _lastHurt < hurtCooldown) return;
+            if (IsDead) return;
 
-            currentHP -= Mathf.Max(1, amount);
-            _lastHurt = Time.time;
+            int before = currentHP;
+            currentHP = Mathf.Max(0, currentHP - amount);
 
-            // TODO: VFX/SFX/knockback
-            if (currentHP <= 0)
+            Debug.Log($"[PlayerHealth] {name} 피격! {amount} 데미지, HP {before} → {currentHP} (from: {source})");
+
+            if (IsDead)
             {
-                // TODO: death/respawn
+                Debug.Log($"[PlayerHealth] {name} 사망!");
+
+                // 간단히 움직임만 막기
+                var ctrl = GetComponent<Project.Player.SimplePlayerController>();
+                if (ctrl) ctrl.enabled = false;
+
+                if (destroyOnDeath)
+                    Destroy(gameObject, 1.5f);
             }
         }
     }

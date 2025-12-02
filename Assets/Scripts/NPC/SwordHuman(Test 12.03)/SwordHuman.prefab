@@ -88,7 +88,7 @@ MonoBehaviour:
   playerLayers:
     serializedVersion: 2
     m_Bits: 256
-  anim: {fileID: 0}
+  anim: {fileID: 5484276516038072575}
   rb: {fileID: 4367016422378950057}
   gfxRoot: {fileID: 886858066480421441}
   attackOrigin: {fileID: 378086727165754136}
@@ -227,7 +227,7 @@ SpriteRenderer:
   m_SortingOrder: 0
   m_Sprite: {fileID: 21300000, guid: 317b8365a4649ab459f6cb58ec8f9f18, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_FlipX: 0
+  m_FlipX: 1
   m_FlipY: 0
   m_DrawMode: 0
   m_Size: {x: 1.28, y: 1.28}
