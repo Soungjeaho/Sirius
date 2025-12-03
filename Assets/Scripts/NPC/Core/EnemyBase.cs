@@ -12,42 +12,15 @@ namespace Project.NPC
         [Header("Ranges")] public float detectRange = 8f; public float loseRange = 12f; public float meleeRange = 1.1f;
         [Header("Combat")] public float attackDelay = 1.6f; public int contactDamage = 1; public LayerMask playerLayers;
         [Header("Refs")] public Animator anim; public Rigidbody2D rb; public Transform gfxRoot; public Transform attackOrigin; public AnimParams animParams;
-        [Header("Visual")]
-        public bool useSpriteFlip = true;   // ← On 권장
-        private SpriteRenderer _sr;
 
         protected int _hp; protected EnemyState _state; protected Transform _player; protected bool _facingRight = true; protected bool _busy = false; protected float _lastAttack = -999f;
         public bool IsDead => _state == EnemyState.Dead;
 
-<<<<<<< HEAD
-=======
-        // EnemyBase.cs
-          // Awake에서 gfxRoot 하위에서 캐시했다면 그대로 사용
-
-        protected float FacingSign()
-        {
-            // SpriteRenderer.flipX를 쓰는 경우: flipX=true면 왼쪽(-1), false면 오른쪽(+1)
-            if (_sr) return _sr.flipX ? -1f : 1f;
-
-            // 스케일 반전을 쓰는 경우(폴백)
-            return (gfxRoot && Mathf.Sign(gfxRoot.localScale.x) < 0f) ? -1f : 1f;
-        }
-
->>>>>>> cb29f6eaf47bb3b9465d604410880c0febd19aa1
         protected virtual void Awake()
         {
-            if (!rb) rb = GetComponent(typeof(UnityEngine.Rigidbody2D)) as UnityEngine.Rigidbody2D;
-            if (!anim) anim = GetComponentInChildren(typeof(UnityEngine.Animator)) as UnityEngine.Animator;
-
-            if (gfxRoot)
-                _sr = gfxRoot.GetComponentInChildren<SpriteRenderer>(true);
-<<<<<<< HEAD
-=======
-            if (gfxRoot) _sr = gfxRoot.GetComponentInChildren<SpriteRenderer>(true);
-
->>>>>>> cb29f6eaf47bb3b9465d604410880c0febd19aa1
+            if (!rb) rb = GetComponent<Rigidbody2D>();
+            if (!anim) anim = GetComponentInChildren<Animator>();
         }
-
 
         protected virtual void OnEnable()
         {
@@ -58,37 +31,8 @@ namespace Project.NPC
         {
             if (IsDead) return;
             AcquirePlayer();
-            // ※ 여기서는 '어느 쪽을 봐야 할지'만 계산하고, 실제 적용은 LateUpdate에서
-            ComputeFacing();
+            UpdateFacing();
             StateUpdate();
-        }
-        protected virtual void LateUpdate()
-        {
-            // 애니메이터가 값을 적용한 뒤 최종적으로 시각 플립을 덮어쓴다
-            ApplyFacing();
-        }
-        private bool _wantRight = true;
-        protected void ComputeFacing()
-        {
-            if (!_player || !gfxRoot) return;
-            _wantRight = (_player.position.x >= transform.position.x);
-        }
-        protected void ApplyFacing()
-        {
-            if (!_player || !gfxRoot) return;
-
-            if (useSpriteFlip && _sr)
-            {
-                // SpriteRenderer.flipX로 확실히 반전 (오른쪽 볼 때 flipX=false)
-                _sr.flipX = !_wantRight;
-            }
-            else
-            {
-                // 폴백: 스케일 반전
-                var s = gfxRoot.localScale;
-                s.x = Mathf.Abs(s.x) * (_wantRight ? 1f : -1f);
-                gfxRoot.localScale = s;
-            }
         }
 
         protected virtual void FixedUpdate()
@@ -186,6 +130,5 @@ namespace Project.NPC
 
         protected abstract void TryMelee();
         protected abstract void TrySkill(float distToPlayer);
-
     }
 }
