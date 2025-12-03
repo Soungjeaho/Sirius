@@ -100,7 +100,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   damage: 2
-  knockbackForce: 8
+  knockbackForce: 20
   enemyDestroyDelay: 0.2
   remainTime: 1
   backDeleteDistance: 1

@@ -1,3 +1,4 @@
+using Project.Combat; // IDamageable 사용
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
@@ -115,11 +116,11 @@ public class HeavyFloatProjectile : MonoBehaviour
 
         if (collision.collider.CompareTag("Enemy"))
         {
-            if (gaugeRef != null)
-                gaugeRef.UseGauge(gaugeCost);
+            // 이제 여기선 게이지 소모 안 함 (발사 시에 소모됨)
             HandleEnemyHit(collision.collider);
             return;
         }
+
 
         if (collision.collider.CompareTag("BalancePlatform"))
         {
@@ -144,26 +145,47 @@ public class HeavyFloatProjectile : MonoBehaviour
     {
         GameObject enemyObj = enemyCol.gameObject;
 
-        //  이미 처리한 적이면 리턴 (중복 방지)
+        // 이미 처리한 적이면 리턴 (중복 방지)
         if (damagedEnemies.Contains(enemyObj))
+        {
             return;
+        }
 
         damagedEnemies.Add(enemyObj);
 
-        EnemyHealth enemy = enemyObj.GetComponent<EnemyHealth>();
-        if (enemy != null)
-            enemy.TakeDamage(damage);
-
-        Rigidbody2D enemyRb = enemyObj.GetComponent<Rigidbody2D>();
+        //  Enemy Rigidbody2D (보통 부모에 있을 수도 있으니 InParent로)
+        Rigidbody2D enemyRb = enemyCol.GetComponentInParent<Rigidbody2D>();
         if (enemyRb != null)
         {
-            Vector2 dir = (enemyObj.transform.position - transform.position).normalized;
-            enemyRb.velocity = Vector2.zero; // 기존 속도 초기화
+            Vector2 dir = ((Vector2)enemyRb.position - (Vector2)transform.position).normalized;
+
+            // 살짝 위로 튕기고 싶으면 Y를 약간 올리자
+            dir.y += 0.3f;
+            dir = dir.normalized;
+
+            enemyRb.velocity = Vector2.zero;
             enemyRb.AddForce(dir * knockbackForce, ForceMode2D.Impulse);
+        }
+
+        // 데미지 주기 (EnemyHealth / EnemyBase는 건들지 않고 IDamageable만 사용)
+        IDamageable damageable = enemyCol.GetComponentInParent<IDamageable>();
+        if (damageable != null && !damageable.IsDead)
+        {
+            Vector2 hitPoint = enemyCol.ClosestPoint(transform.position);
+            Vector2 hitNormal = ((Vector2)enemyObj.transform.position - (Vector2)transform.position).normalized;
+
+            damageable.ApplyDamage(damage, hitPoint, hitNormal, this);
+
+            // 여기서도 "처치 시 게이지 +1"을 주고 싶으면 이 부분 유지
+            if (gaugeRef != null && damageable.IsDead)
+            {
+                gaugeRef.AddGauge(1);
+            }
         }
 
         StartCoroutine(DestroyAfterDelay(enemyDestroyDelay));
     }
+
 
     private void HandleBalancePlatformCollision(Collider2D col)
     {

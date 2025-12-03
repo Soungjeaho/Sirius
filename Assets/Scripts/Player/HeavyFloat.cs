@@ -8,7 +8,7 @@ public class HeavyFloat : MonoBehaviour
     [SerializeField] private Transform firePoint = null;
     [SerializeField] private float heavySpeed = 12f;
     [SerializeField] private float maxDistance = 8f;
-    [SerializeField] private int gaugeCost = 3;
+    [SerializeField] private int gaugeCost = 2;
     [SerializeField] private float recoilForce = 4f;
 
     [Header("참조")]
@@ -38,13 +38,13 @@ public class HeavyFloat : MonoBehaviour
     {
         AimAtMouse();
 
-        // 🔹 발사 (우클릭)
+        //  발사 (우클릭)
         if (Input.GetMouseButtonDown(1))
         {
             TryFireHeavy();
         }
 
-        // 🔹 회수 (E키)
+        //  회수 (E키)
         if (Input.GetKeyDown(KeyCode.E))
         {
             TryRecallHeavy();
@@ -80,9 +80,20 @@ public class HeavyFloat : MonoBehaviour
 
     private void TryFireHeavy()
     {
-        if (isFired) return;
+        if (isFired)
+        {
+            return;
+        }
 
-        // 🔹 게이지는 발사 시 소모하지 않음
+        // 🔹 게이지 부족이면 발사 자체를 막기
+        if (gauge != null && gaugeCost > 0)
+        {
+            if (!gauge.UseGauge(gaugeCost))
+            {
+                Debug.Log("HeavyFloat: 게이지 부족, 무거운 찌 발사 불가");
+                return;
+            }
+        }
 
         // HeavyFloatProjectile 인스턴스 생성
         currentHook = Instantiate(heavyHookPrefab, firePoint.position, Quaternion.identity);
@@ -92,7 +103,7 @@ public class HeavyFloat : MonoBehaviour
         if (projectile != null)
         {
             projectile.SetFirePoint(firePoint);
-            projectile.SetGaugeReference(gauge, gaugeCost); // ✅ 게이지 참조 전달 (적 충돌 시 차감)
+            projectile.SetGaugeReference(gauge, gaugeCost); // 이제 cost는 보상용에만 쓸 수도 있음
         }
 
         // 발사 속도 부여
