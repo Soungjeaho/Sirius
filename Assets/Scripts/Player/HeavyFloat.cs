@@ -20,31 +20,40 @@ public class HeavyFloat : MonoBehaviour
     private GameObject currentHook;
     private Vector2 fireDirection;
     private bool isFired = false;
-    private bool facingRight = true;
 
     private void Start()
     {
         m_cam = Camera.main;
 
         if (firePoint == null)
+        {
             Debug.LogError("FirePoint가 할당되지 않았습니다!");
+        }
+
         if (gauge == null)
+        {
             gauge = FindObjectOfType<EnergyGauge>();
+        }
+
         if (playerRb == null)
+        {
             playerRb = GetComponent<Rigidbody2D>();
+        }
     }
 
     private void Update()
     {
         AimAtMouse();
 
-        //  발사 (우클릭)
         if (Input.GetMouseButtonDown(1))
         {
-            TryFireHeavy();
+            if (PlayerController.Instance == null ||
+                PlayerController.Instance.IsMouseInFrontOfPlayer())
+            {
+                TryFireHeavy();
+            }
         }
 
-        //  회수 (E키)
         if (Input.GetKeyDown(KeyCode.E))
         {
             TryRecallHeavy();
@@ -55,32 +64,27 @@ public class HeavyFloat : MonoBehaviour
 
     private void AimAtMouse()
     {
-        if (m_cam == null || firePoint == null) return;
+        if (m_cam == null || firePoint == null)
+        {
+            return;
+        }
 
         Vector2 mousePos = m_cam.ScreenToWorldPoint(Input.mousePosition);
         fireDirection = (mousePos - (Vector2)firePoint.position).normalized;
 
-        // 플레이어 방향 전환
-        if (mousePos.x < transform.position.x && facingRight)
-        {
-            Flip(false);
-        }
-        else if (mousePos.x > transform.position.x && !facingRight)
-        {
-            Flip(true);
-        }
-    }
-
-    private void Flip(bool faceRight)
-    {
-        facingRight = faceRight;
-        float yRotation = facingRight ? 0f : 180f;
-        transform.rotation = Quaternion.Euler(0, yRotation, 0);
+        // 🔹 여기서는 더 이상 Flip을 하지 않는다.
+        //    몸 방향 / FirePoint 좌우 위치는 PlayerController가 관리.
     }
 
     private void TryFireHeavy()
     {
         if (isFired)
+        {
+            return;
+        }
+
+        if (PlayerController.Instance != null &&
+            !PlayerController.Instance.IsMouseInFrontOfPlayer())
         {
             return;
         }
@@ -103,7 +107,7 @@ public class HeavyFloat : MonoBehaviour
         if (projectile != null)
         {
             projectile.SetFirePoint(firePoint);
-            projectile.SetGaugeReference(gauge, gaugeCost); // 이제 cost는 보상용에만 쓸 수도 있음
+            projectile.SetGaugeReference(gauge, gaugeCost);
         }
 
         // 발사 속도 부여
@@ -133,7 +137,10 @@ public class HeavyFloat : MonoBehaviour
 
     private void TryRecallHeavy()
     {
-        if (!isFired || currentHook == null) return;
+        if (!isFired || currentHook == null)
+        {
+            return;
+        }
 
         // 🔹 Switch 위에 있는 경우만 회수 허용
         HeavyFloatProjectile projectile = currentHook.GetComponent<HeavyFloatProjectile>();
@@ -172,6 +179,7 @@ public class HeavyFloat : MonoBehaviour
                 isFired = false;
                 yield break;
             }
+
             yield return null;
         }
 

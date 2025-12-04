@@ -7,8 +7,12 @@ public class PlayerController : MonoBehaviour
 {
     [Header("Movement Settings")]
     [SerializeField] private float walkSpeed = 5;
+    [SerializeField] private float runSpeed = 8;
     [SerializeField] private float jumpForce = 10;
     [SerializeField] private int maxJumpCount = 2;
+
+    [Header("Run Settings")]
+    [SerializeField] private float doubleTapTime = 0.25f;
 
     [Header("Ground Check")]
     [SerializeField] private Transform groundCheckPoint;
@@ -21,19 +25,56 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float attackMaxDistance = 2.0f;
     [SerializeField] private float attackRadius = 0.5f;
     [SerializeField] private int attackDamage = 1;
+    private bool isAttackLoopRunning = false;
+
+    [Header("Mouse Front Limit")]
+    [SerializeField] private float mouseFrontOffsetX = 0.2f;   // 손 기준으로 얼마나 앞에서부터 허용할지
+
+    [Header("Attack VFX")]
+    [SerializeField] private GameObject slashVFX;
+    [SerializeField] private float slashAngleOffset = 0f;
+    [SerializeField] private float slashBaseLength = 1f; // scale.x = 1일 때 이펙트의 기준 길이
 
 
     [Header("References")]
+    [SerializeField] private SpriteRenderer spriteRenderer;
+    [SerializeField] private Transform firePoint;
     [SerializeField] private EnergyGauge energyGauge;
     [SerializeField] private Reelback reelback;
-    [SerializeField] private HeavyFloat heavyFloat; // 무거운 찌 추가
+    [SerializeField] private HeavyFloat heavyFloat;
     [SerializeField] private HookModeUI hookModeUI;
 
     private Rigidbody2D rb;
     private float xAxis;
     private int jumpCount;
-    private bool wasGrounded = false; // 직전 프레임의 착지 상태 저장
-    private bool canAttack = true;
+    private bool wasGrounded = false;
+    private bool facingRight = true;
+
+    private bool isRunning = false;
+    private float lastTapTime = -1f;
+    private int lastTapDir = 0; // -1(left), 1(right), 0(none)
+
+    private int hookMode = 1; // 1: Normal, 2: Heavy
+    private Vector2 lastAttackDir = Vector2.right;
+
+    public static PlayerController Instance;
+
+    public bool IsRunning
+    {
+        get
+        {
+            return isRunning;
+        }
+    }
+
+    public float HorizontalInput
+    {
+        get
+        {
+            return xAxis;
+        }
+    }
+
     public bool IsNormalHook
     {
         get
@@ -42,12 +83,21 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    public float RunSpeed
+    {
+        get
+        {
+            return runSpeed;
+        }
+    }
 
-    private int hookMode = 1; // 1: Normal, 2: Heavy
-
-    private Vector2 lastAttackDir = Vector2.right;
-
-    public static PlayerController Instance;
+    public bool FacingRight
+    {
+        get
+        {
+            return facingRight;
+        }
+    }
 
     private void Awake()
     {
@@ -61,16 +111,17 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    void Start()
+    private void Start()
     {
         rb = GetComponent<Rigidbody2D>();
-        SetHookMode(1); // 시작 시 Normal 상태
+        SetHookMode(1);
     }
 
-    void Update()
+    private void Update()
     {
         HandleHookSwitch();
         GetInputs();
+        HandleFlip();
 
         if (!reelback.IsGrappling)
         {
@@ -80,10 +131,8 @@ public class PlayerController : MonoBehaviour
         Jump();
         Attack();
 
-        // ✅ 착지 상태 갱신
         bool groundedNow = Grounded();
 
-        // 착지한 순간에만 jumpCount 초기화
         if (groundedNow && !wasGrounded)
         {
             jumpCount = 0;
@@ -91,12 +140,72 @@ public class PlayerController : MonoBehaviour
 
         wasGrounded = groundedNow;
     }
-    // 마우스 휠로 찌 교체
+
+    private void LateUpdate()
+    {
+        AimFirePointToMouse();
+    }
+
+    private void HandleFlip()
+    {
+        if (xAxis > 0.01f && !facingRight)
+        {
+            Flip();
+        }
+        else if (xAxis < -0.01f && facingRight)
+        {
+            Flip();
+        }
+    }
+
+    private void Flip()
+    {
+        facingRight = !facingRight;
+
+        if (spriteRenderer != null)
+        {
+            Transform spriteTr = spriteRenderer.transform;
+            Vector3 scale = spriteTr.localScale;
+
+            scale.x = facingRight ? 1f : -1f;
+            spriteTr.localScale = scale;
+        }
+
+        if (firePoint != null)
+        {
+            Vector3 pos = firePoint.localPosition;
+
+            if (facingRight)
+            {
+                pos.x = 0f;
+            }
+            else
+            {
+                pos.x = -1f;
+            }
+
+            firePoint.localPosition = pos;
+        }
+    }
+
+    private void AimFirePointToMouse()
+    {
+        if (firePoint == null)
+        {
+            return;
+        }
+
+        Vector3 mouseWorld = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        Vector2 dir = (mouseWorld - firePoint.position).normalized;
+
+        float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
+        firePoint.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
+    }
     private void HandleHookSwitch()
     {
         float scroll = Input.GetAxis("Mouse ScrollWheel");
 
-        int prevMode = hookMode; // 이전 모드 저장
+        int prevMode = hookMode;
 
         if (scroll > 0f)
         {
@@ -109,42 +218,93 @@ public class PlayerController : MonoBehaviour
 
         hookMode = Mathf.Clamp(hookMode, 1, 2);
 
-        // 🔹 모드가 실제로 바뀐 경우에만 적용
         if (hookMode != prevMode)
         {
             SetHookMode(hookMode);
         }
     }
 
-    // 찌 교체 로직
     private void SetHookMode(int mode)
     {
         switch (mode)
         {
-            case 1: // Normal Hook
-                reelback.enabled = true;
-                if (heavyFloat != null) heavyFloat.enabled = false;
-                break;
+            case 1:
+                {
+                    reelback.enabled = true;
+                    if (heavyFloat != null)
+                    {
+                        heavyFloat.enabled = false;
+                    }
+                    break;
+                }
 
-            case 2: // Heavy Hook
-                reelback.enabled = false;
-                if (heavyFloat != null) heavyFloat.enabled = true;
-                break;
+            case 2:
+                {
+                    reelback.enabled = false;
+                    if (heavyFloat != null)
+                    {
+                        heavyFloat.enabled = true;
+                    }
+                    break;
+                }
         }
 
         if (hookModeUI != null)
+        {
             hookModeUI.UpdateUI(mode);
-        //  실제로 변경된 경우에만 한 번 출력
+        }
+
         Debug.Log($"[Hook Mode] 현재 찌: {(mode == 1 ? "Normal" : "Heavy")}");
     }
+
     private void GetInputs()
     {
         xAxis = Input.GetAxisRaw("Horizontal");
+
+        int currentTapDir = 0;
+
+        if (Input.GetKeyDown(KeyCode.LeftArrow) || Input.GetKeyDown(KeyCode.A))
+        {
+            currentTapDir = -1;
+        }
+        else if (Input.GetKeyDown(KeyCode.RightArrow) || Input.GetKeyDown(KeyCode.D))
+        {
+            currentTapDir = 1;
+        }
+
+        if (currentTapDir != 0)
+        {
+            if (currentTapDir == lastTapDir && Time.time - lastTapTime <= doubleTapTime)
+            {
+                isRunning = true;
+            }
+
+            lastTapDir = currentTapDir;
+            lastTapTime = Time.time;
+        }
+
+        if (Mathf.Approximately(xAxis, 0f))
+        {
+            isRunning = false;
+        }
+        else if (Mathf.Sign(xAxis) != lastTapDir)
+        {
+            isRunning = false;
+        }
+
+        if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
+        {
+            if (!Mathf.Approximately(xAxis, 0f))
+            {
+                isRunning = true;
+            }
+        }
     }
 
     private void Move()
     {
-        rb.velocity = new Vector2(walkSpeed * xAxis, rb.velocity.y);
+        float targetSpeed = isRunning ? runSpeed : walkSpeed;
+        rb.velocity = new Vector2(targetSpeed * xAxis, rb.velocity.y);
     }
 
     private void Jump()
@@ -154,7 +314,9 @@ public class PlayerController : MonoBehaviour
             if (Grounded() || jumpCount < maxJumpCount)
             {
                 if (reelback.IsGrappling)
+                {
                     reelback.StopGrapple();
+                }
 
                 rb.velocity = new Vector2(rb.velocity.x, jumpForce);
                 jumpCount++;
@@ -167,38 +329,69 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-
     private void Attack()
     {
-        // Heavy 모드일 땐 공격 막기
         if (hookMode == 2)
         {
             return;
         }
 
-        if (!canAttack)
+        // 마우스가 FirePoint y선을 벗어나면 공격 금지
+        if (!IsMouseInFrontOfPlayer())
         {
             return;
         }
 
-        // 좌클릭 공격
-        if (Input.GetMouseButtonDown(0))
+        if (isAttackLoopRunning)
         {
-            StartCoroutine(PerformAttack());
+            return;
+        }
+
+        if (Input.GetMouseButton(0))
+        {
+            StartCoroutine(AttackLoop());
         }
     }
 
-    private IEnumerator PerformAttack()
-    {
-        canAttack = false;
 
-        bool killedEnemy = false; //  죽인 적이 있는지 추적 변수
+    private IEnumerator AttackLoop()
+    {
+        isAttackLoopRunning = true;
+
+        while (Input.GetMouseButton(0))
+        {
+            DoAttackOnce();
+            yield return new WaitForSeconds(attackDelay);
+        }
+
+        isAttackLoopRunning = false;
+    }
+
+    private void DoAttackOnce()
+    {
+        if (!IsMouseInFrontOfPlayer())
+        {
+            return;
+        }
+
+        bool killedEnemy = false;
+
+        Vector2 origin = firePoint != null
+            ? (Vector2)firePoint.position
+            : (Vector2)transform.position;
 
         Vector2 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        Vector2 dir = (mousePos - (Vector2)transform.position).normalized;
+        Vector2 dir = (mousePos - origin).normalized;
         lastAttackDir = dir;
 
-        Vector2 attackCenter = (Vector2)transform.position + dir * attackMaxDistance;
+        // 최대 사거리 지점(판정 중심)
+        Vector2 attackCenter = origin + dir * attackMaxDistance;
+
+        // 이펙트는 min~max 구간의 중간 지점에 배치
+        float midDistance = (attackMinDistance + attackMaxDistance) * 0.5f;
+        Vector2 visualCenter = origin + dir * midDistance;
+
+        SpawnSlashEffect(visualCenter, dir);
 
         Collider2D[] hits = Physics2D.OverlapCircleAll(attackCenter, attackRadius);
 
@@ -209,7 +402,8 @@ public class PlayerController : MonoBehaviour
                 continue;
             }
 
-            float dist = Vector2.Distance(transform.position, hit.transform.position);
+            float dist = Vector2.Distance(origin, hit.transform.position);
+
             if (dist < attackMinDistance || dist > attackMaxDistance)
             {
                 continue;
@@ -226,23 +420,47 @@ public class PlayerController : MonoBehaviour
 
             damageable.ApplyDamage(attackDamage, hitPoint, hitNormal, this);
 
-            // Enemy가 공격으로 죽었다면 기록
             if (damageable.IsDead)
             {
                 killedEnemy = true;
             }
         }
 
-        yield return new WaitForSeconds(attackDelay);
-        canAttack = true;
-
-        // 한 명이라도 죽였으면 게이지 +1
-        if (killedEnemy)
+        if (killedEnemy && energyGauge != null)
         {
             energyGauge.AddGauge(1);
         }
     }
 
+
+    private void SpawnSlashEffect(Vector2 center, Vector2 dir)
+    {
+        if (slashVFX == null)
+        {
+            return;
+        }
+
+        GameObject vfx = Instantiate(slashVFX, center, Quaternion.identity);
+
+        float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
+        vfx.transform.rotation = Quaternion.Euler(0f, 0f, angle + slashAngleOffset);
+
+        // 공격 구간 길이 = max - min
+        float attackLength = Mathf.Max(0f, attackMaxDistance - attackMinDistance);
+
+        // slashBaseLength가 0 이하로 들어가면 나눗셈 방지용
+        if (slashBaseLength <= 0f)
+        {
+            slashBaseLength = 1f;
+        }
+
+        // 현재 이펙트의 기본 스케일 가져온 뒤 x만 조정
+        Vector3 scale = vfx.transform.localScale;
+        scale.x = attackLength / slashBaseLength;
+        vfx.transform.localScale = scale;
+
+        Destroy(vfx, 1.0f);
+    }
 
     public bool Grounded()
     {
@@ -253,26 +471,63 @@ public class PlayerController : MonoBehaviour
     {
         return rb;
     }
+    public bool IsMouseInFrontOfPlayer()
+    {
+        if (firePoint == null || Camera.main == null)
+        {
+            return true;
+        }
 
-    private void OnDrawGizmosSelected()
+        Vector3 mouseWorld = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        float dx = mouseWorld.x - firePoint.position.x;
+
+        // 플레이어가 오른쪽을 보고 있을 때는 firePoint보다 "오른쪽"이 앞
+        if (facingRight)
+        {
+            return dx >= mouseFrontOffsetX;
+        }
+        // 플레이어가 왼쪽을 보고 있을 때는 firePoint보다 "왼쪽"이 앞
+        else
+        {
+            return dx <= -mouseFrontOffsetX;
+        }
+    }
+
+
+
+    // 공격범위 체크용 기즈모
+    /*private void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.green;
-        Gizmos.DrawWireSphere(groundCheckPoint.position, groundCheckRadius);
+        if (groundCheckPoint != null)
+        {
+            Gizmos.DrawWireSphere(groundCheckPoint.position, groundCheckRadius);
+        }
 
         if (Camera.main != null)
         {
+            Vector2 origin = firePoint != null
+                ? (Vector2)firePoint.position
+                : (Vector2)transform.position;
+
             Vector2 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-            Vector2 dir = Application.isPlaying ? lastAttackDir : (mousePos - (Vector2)transform.position).normalized;
-            Vector2 attackCenter = (Vector2)transform.position + dir * attackMaxDistance;
+            Vector2 dir = Application.isPlaying
+                ? lastAttackDir
+                : (mousePos - origin).normalized;
+
+            Vector2 attackCenter = origin + dir * attackMaxDistance;
 
             Gizmos.color = Color.yellow;
-            Gizmos.DrawWireSphere((Vector2)transform.position + dir * attackMinDistance, 0.1f);
+            Gizmos.DrawWireSphere(origin + dir * attackMinDistance, 0.1f);
+
             Gizmos.color = Color.red;
-            Gizmos.DrawWireSphere((Vector2)transform.position + dir * attackMaxDistance, 0.1f);
+            Gizmos.DrawWireSphere(origin + dir * attackMaxDistance, 0.1f);
+
             Gizmos.color = Color.cyan;
             Gizmos.DrawWireSphere(attackCenter, attackRadius);
+
             Gizmos.color = Color.white;
-            Gizmos.DrawLine(transform.position, (Vector2)transform.position + dir * attackMaxDistance);
+            Gizmos.DrawLine(origin, origin + dir * attackMaxDistance);
         }
-    }
+    }*/
 }

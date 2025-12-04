@@ -19,7 +19,6 @@ public class Reelback : MonoBehaviour
 
     private Vector2 fireDirection;
     private Camera m_cam = null;
-    private bool facingRight = true;
     private GameObject currentHook = null;
 
     private bool hookTriggered = false;
@@ -85,27 +84,18 @@ public class Reelback : MonoBehaviour
 
         Vector2 mousePos = mouseWorld;
         fireDirection = (mousePos - (Vector2)FirePoint.position).normalized;
-
-        if (mousePos.x < FirePoint.position.x && facingRight)
-        {
-            Flip(false);
-        }
-        else if (mousePos.x > FirePoint.position.x && !facingRight)
-        {
-            Flip(true);
-        }
-    }
-
-    private void Flip(bool faceRight)
-    {
-        facingRight = faceRight;
-        float yRotation = facingRight ? 0f : 180f;
-        transform.rotation = Quaternion.Euler(0, yRotation, 0);
     }
 
     private void TryFire()
     {
         if (IsGrappling)
+        {
+            return;
+        }
+
+        // 마우스 Y가 FirePoint 기준 범위 밖이면 발사하지 않음
+        if (PlayerController.Instance != null &&
+            !PlayerController.Instance.IsMouseInFrontOfPlayer())
         {
             return;
         }
@@ -137,7 +127,6 @@ public class Reelback : MonoBehaviour
             StartCoroutine(CheckHookDistanceCoroutine(currentHook, FirePoint.position));
         }
     }
-
 
     private IEnumerator CheckHookDistanceCoroutine(GameObject hook, Vector2 startPos)
     {
@@ -244,7 +233,6 @@ public class Reelback : MonoBehaviour
         }
     }
 
-
     private IEnumerator SnapPlayerToWall(Vector2 hitPos)
     {
         GameObject player = GameObject.FindWithTag("Player");
@@ -263,7 +251,20 @@ public class Reelback : MonoBehaviour
         float elapsed = 0f;
         float duration = 0.3f;
 
-        Vector2 wallOffset = new Vector2(facingRight ? -0.5f : 0.5f, 0f);
+        //  PlayerController 방향 기준으로 벽 옆에 붙이기
+        bool faceRight = true;
+
+        if (playerController != null)
+        {
+            faceRight = playerController.FacingRight;
+        }
+        else if (playerSprite != null)
+        {
+            // flipX == true 면 왼쪽을 보고 있는 상태
+            faceRight = !playerSprite.flipX;
+        }
+
+        Vector2 wallOffset = new Vector2(faceRight ? -0.5f : 0.5f, 0f);
         Vector2 targetPos = hitPos + wallOffset;
 
         while (elapsed < duration)
@@ -479,11 +480,10 @@ public class Reelback : MonoBehaviour
 
         while (enemyObj != null && playerTr != null)
         {
-            // 플레이어 기준 목표 위치 (좌우는 플레이어 보는 방향 고려해서 조정해도 됨)
             Vector2 baseOffset = enemyPullOffset;
 
             // 플레이어 스프라이트 방향에 따라 좌우 반전
-            if (playerSprite != null && playerSprite.flipX)
+            if (playerController != null && !playerController.FacingRight)
             {
                 baseOffset.x *= -1f;
             }
@@ -536,11 +536,10 @@ public class Reelback : MonoBehaviour
             Vector2 hitPoint = enemyObj != null ? (Vector2)enemyObj.transform.position : (Vector2)playerTr.position;
             Vector2 hitNormal = Vector2.right;
 
-            if (playerSprite != null && playerSprite.flipX)
+            if (playerController != null && !playerController.FacingRight)
             {
                 hitNormal = Vector2.left;
             }
-
             dmg.ApplyDamage(9999, hitPoint, hitNormal, this);
             Debug.Log("Enemy Hook 즉사 처리!");
         }
@@ -554,5 +553,4 @@ public class Reelback : MonoBehaviour
         isEnemyBeingGrappled = false;
         isPullingEnemy = false;
     }
-
 }

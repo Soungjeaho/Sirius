@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 243997812481752001}
   - component: {fileID: 6776238320410457071}
   - component: {fileID: 2618473833531960108}
-  m_Layer: 9
+  m_Layer: 3
   m_Name: HeavyFloat
   m_TagString: HeavyProjectile
   m_Icon: {fileID: 0}

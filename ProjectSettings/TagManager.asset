@@ -10,11 +10,16 @@ TagManager:
   - RB_Wall
   - Wall
   - Obstacle
+  - BalanceTilemap
+  - CrackedTilemap
+  - Switch
+  - HeavyProjectile
+  - BalancePlatform
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - Hook
   - Water
   - UI
   - Reelbackable
