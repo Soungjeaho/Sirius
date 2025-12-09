@@ -669,10 +669,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 3610180242964374031, guid: 3e517d12cf117e445962f31b5dc8f642, type: 3}
-      propertyPath: m_Name
-      value: 'ReelbackObj '
-      objectReference: {fileID: 0}
     - target: {fileID: 2188181843864444695, guid: 3e517d12cf117e445962f31b5dc8f642, type: 3}
       propertyPath: m_LocalPosition.x
       value: 9.6
@@ -730,10 +726,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 6330504535267335280, guid: 0192b3c24d077d240b481613ce94151f, type: 3}
-      propertyPath: m_Name
-      value: 'UI '
-      objectReference: {fileID: 0}
     - target: {fileID: 5756038376644735880, guid: 0192b3c24d077d240b481613ce94151f, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -791,6 +783,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1822859472015798587, guid: 8b05686307ef75a43bf2b9d1161289fe, type: 3}
+      propertyPath: m_Name
+      value: Stage1
+      objectReference: {fileID: 0}
     - target: {fileID: 6887308152323881782, guid: 8b05686307ef75a43bf2b9d1161289fe, type: 3}
       propertyPath: m_LocalPosition.x
       value: 2.5613906
@@ -831,10 +827,6 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 1822859472015798587, guid: 8b05686307ef75a43bf2b9d1161289fe, type: 3}
-      propertyPath: m_Name
-      value: Stage1
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -848,10 +840,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 4243855466792666521, guid: 1e627803b438da64d80956475aa817f6, type: 3}
-      propertyPath: m_Layer
-      value: 0
-      objectReference: {fileID: 0}
     - target: {fileID: 1892456490976867353, guid: 1e627803b438da64d80956475aa817f6, type: 3}
       propertyPath: m_LocalPosition.x
       value: 10.89
@@ -892,16 +880,20 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4178034772392701527, guid: 1e627803b438da64d80956475aa817f6, type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4243855466792666521, guid: 1e627803b438da64d80956475aa817f6, type: 3}
+      propertyPath: m_Layer
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 6282800021653967275, guid: 1e627803b438da64d80956475aa817f6, type: 3}
       propertyPath: m_Name
       value: SwordHuman 1
       objectReference: {fileID: 0}
     - target: {fileID: 6282800021653967275, guid: 1e627803b438da64d80956475aa817f6, type: 3}
       propertyPath: m_IsActive
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 4178034772392701527, guid: 1e627803b438da64d80956475aa817f6, type: 3}
-      propertyPath: m_Enabled
       value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
@@ -933,10 +925,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 8590541132567075270, guid: 497a37337163f6f4791449811c648812, type: 3}
-      propertyPath: m_Name
-      value: 'BalancePlatform '
-      objectReference: {fileID: 0}
     - target: {fileID: 5077594083161549512, guid: 497a37337163f6f4791449811c648812, type: 3}
       propertyPath: m_LocalPosition.x
       value: 18.72
@@ -1051,10 +1039,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 9070120846058103483, guid: 9d68430163c9b2f4ca0f61ca3c6f0dc1, type: 3}
-      propertyPath: m_Name
-      value: 'DoorSwitch '
-      objectReference: {fileID: 0}
     - target: {fileID: 5253990601645357208, guid: 9d68430163c9b2f4ca0f61ca3c6f0dc1, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0

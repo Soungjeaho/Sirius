@@ -9,6 +9,8 @@ public class PlayerAnimator : MonoBehaviour
     private PlayerController playerController;
 
     private int hashVelocityX;
+    private int hashVelocityY;
+    private int hashIsJump;
 
     private void Awake()
     {
@@ -16,6 +18,8 @@ public class PlayerAnimator : MonoBehaviour
         playerController = GetComponentInParent<PlayerController>();
 
         hashVelocityX = Animator.StringToHash("velocityX");
+        hashVelocityY = Animator.StringToHash("velocityY");
+        hashIsJump = Animator.StringToHash("isJump");
     }
 
     private void Update()
@@ -25,29 +29,16 @@ public class PlayerAnimator : MonoBehaviour
             return;
         }
 
+        // ... (기존 velocityX, velocityY, isJump 로직은 유지) ...
+
         float input = Mathf.Abs(playerController.HorizontalInput);
-        float value = 0f;
-
-        // 입력 없으면 Idle → 0
-        if (input <= 0f)
-        {
-            value = 0f;
-        }
-        else
-        {
-            // 입력 있음 → 걷기 / 달리기 구분
-            if (playerController.IsRunning)
-            {
-                // Run
-                value = 1f;
-            }
-            else
-            {
-                // Walk
-                value = 0.5f;
-            }
-        }
-
+        float value = playerController.IsRunning ? 1f : (input > 0f ? 0.5f : 0f);
         animator.SetFloat(hashVelocityX, value);
+
+        float currentVelocityY = playerController.GetRigidbody().velocity.y;
+        animator.SetFloat(hashVelocityY, currentVelocityY);
+
+        bool isCurrentlyJumpingOrFalling = !playerController.Grounded();
+        animator.SetBool(hashIsJump, isCurrentlyJumpingOrFalling);
     }
 }

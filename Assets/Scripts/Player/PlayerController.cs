@@ -59,13 +59,6 @@ public class PlayerController : MonoBehaviour
 
     public static PlayerController Instance;
 
-    public bool IsRunning
-    {
-        get
-        {
-            return isRunning;
-        }
-    }
 
     public float HorizontalInput
     {
@@ -74,20 +67,26 @@ public class PlayerController : MonoBehaviour
             return xAxis;
         }
     }
+    public float RunSpeed
+    {
+        get
+        {
+            return runSpeed;
+        }
+    }
+    public bool IsRunning
+    {
+        get
+        {
+            return isRunning;
+        }
+    }
 
     public bool IsNormalHook
     {
         get
         {
             return hookMode == 1;
-        }
-    }
-
-    public float RunSpeed
-    {
-        get
-        {
-            return runSpeed;
         }
     }
 
@@ -132,12 +131,16 @@ public class PlayerController : MonoBehaviour
         Attack();
 
         bool groundedNow = Grounded();
+        float currentVelocityY = rb.velocity.y; // Rigidbody의 수직 속도 가져오기
 
-        if (groundedNow && !wasGrounded)
+        if (groundedNow)
         {
-            jumpCount = 0;
+            // 땅에 닿았을 때 점프 카운트 리셋
+            if (!wasGrounded)
+            {
+                jumpCount = 0;
+            }
         }
-
         wasGrounded = groundedNow;
     }
 
@@ -461,7 +464,7 @@ public class PlayerController : MonoBehaviour
 
         Destroy(vfx, 1.0f);
     }
-
+        
     public bool Grounded()
     {
         return Physics2D.OverlapCircle(groundCheckPoint.position, groundCheckRadius, whatIsGround);
