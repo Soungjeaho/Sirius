@@ -11,6 +11,7 @@ public class PlayerAnimator : MonoBehaviour
     private int hashVelocityX;
     private int hashVelocityY;
     private int hashIsJump;
+    private int hashAttack; 
 
     private void Awake()
     {
@@ -20,6 +21,7 @@ public class PlayerAnimator : MonoBehaviour
         hashVelocityX = Animator.StringToHash("velocityX");
         hashVelocityY = Animator.StringToHash("velocityY");
         hashIsJump = Animator.StringToHash("isJump");
+        hashAttack = Animator.StringToHash("attack"); 
     }
 
     private void Update()
@@ -28,8 +30,6 @@ public class PlayerAnimator : MonoBehaviour
         {
             return;
         }
-
-        // ... (기존 velocityX, velocityY, isJump 로직은 유지) ...
 
         float input = Mathf.Abs(playerController.HorizontalInput);
         float value = playerController.IsRunning ? 1f : (input > 0f ? 0.5f : 0f);
@@ -40,5 +40,11 @@ public class PlayerAnimator : MonoBehaviour
 
         bool isCurrentlyJumpingOrFalling = !playerController.Grounded();
         animator.SetBool(hashIsJump, isCurrentlyJumpingOrFalling);
+
+        // --- 공격 Trigger 발동 (추가됨) ---
+        if (playerController.TriggerAttack)
+        {
+            animator.SetTrigger(hashAttack);
+        }
     }
 }

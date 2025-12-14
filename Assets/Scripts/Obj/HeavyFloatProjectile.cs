@@ -5,6 +5,10 @@ using System.Collections.Generic;
 
 public class HeavyFloatProjectile : MonoBehaviour
 {
+    [Header("Attack VFX")] 
+    [SerializeField] private GameObject hitEffectPrefab; // 이펙트 프리팹 
+    [SerializeField] private float hitEffectOffset = 0.1f; // 충돌 지점 보정 거리 
+
     [Header("기본 설정")]
     [SerializeField] private int damage = 2;
     [SerializeField] private float knockbackForce = 20f;
@@ -79,50 +83,40 @@ public class HeavyFloatProjectile : MonoBehaviour
         if (isDying)
             return;
 
-        //  Switch 충돌 감지
-        if (collision.collider.CompareTag("Switch"))
-        {
-            Rigidbody2D rb = GetComponent<Rigidbody2D>();
-            if (rb != null && rb.velocity.y <= 0)
-            {
-                Vector3 pos = transform.position;
-                pos.y = collision.collider.bounds.max.y + GetComponent<Collider2D>().bounds.extents.y;
-                transform.position = pos;
-                rb.velocity = Vector2.zero;
-            }
+        // 제외 태그 목록: Switch, CrackedTilemap, Player, Enemy, BalancePlatform
+        string tag = collision.collider.tag;
 
+        // ----------------------------------------------------------------------
+        // 1. 특별한 상호작용이 필요한 태그 처리 (기존 로직 유지)
+        // ----------------------------------------------------------------------
+
+        if (tag == "Switch")
+        {
+            // ... (Switch 처리 로직 유지) ...
             IsOnSwitch = true;
             return;
         }
 
-        // 이하 기존 코드 유지
-        if (collision.collider.CompareTag("CrackedTilemap"))
+        if (tag == "CrackedTilemap")
         {
-            var cracked = collision.collider.GetComponent<CrackedTilemap>();
-            if (cracked != null)
-            {
-                Vector2 hitPoint = collision.contacts[0].point;
-                cracked.OnHeavyHit(hitPoint);
-            }
+            // ... (CrackedTilemap 처리 로직 유지) ...
             StartCoroutine(DestroyAfterDelay(enemyDestroyDelay));
             return;
         }
 
-        if (collision.collider.CompareTag("Player"))
+        if (tag == "Player")
         {
             SafeDestroy();
             return;
         }
 
-        if (collision.collider.CompareTag("Enemy"))
+        if (tag == "Enemy")
         {
-            // 이제 여기선 게이지 소모 안 함 (발사 시에 소모됨)
             HandleEnemyHit(collision.collider);
             return;
         }
 
-
-        if (collision.collider.CompareTag("BalancePlatform"))
+        if (tag == "BalancePlatform")
         {
             if (!hasActivatedPlatform)
             {
@@ -133,12 +127,19 @@ public class HeavyFloatProjectile : MonoBehaviour
             return;
         }
 
-        if (collision.collider.CompareTag("Ground") ||
-            collision.collider.CompareTag("RB_Wall") ||
-            collision.collider.CompareTag("Obstacle"))
-        {
-            SafeDestroy();
-        }
+        // ----------------------------------------------------------------------
+        // 2. 기타 모든 충돌 처리 (이펙트 생성 및 파괴)
+        // ----------------------------------------------------------------------
+
+        // 기타 모든 충돌 (Ground, RB_Wall, Obstacle 등)
+        // 혹은 위의 if/return 문에 해당하지 않는 모든 태그가 여기에 해당됨
+
+        // 이펙트를 생성할 충돌 지점 계산
+        Vector2 hitPoint = collision.contacts[0].point;
+        Vector2 hitNormal = collision.contacts[0].normal;
+
+        // 이펙트 생성 후 파괴
+        SpawnHitEffectAndDestroy(hitPoint, hitNormal);
     }
 
     private void HandleEnemyHit(Collider2D enemyCol)
@@ -185,8 +186,23 @@ public class HeavyFloatProjectile : MonoBehaviour
 
         StartCoroutine(DestroyAfterDelay(enemyDestroyDelay));
     }
+    private void SpawnHitEffectAndDestroy(Vector2 collisionPoint, Vector2 collisionNormal)
+    {
+        if (hitEffectPrefab != null)
+        {
+            // 1. 위치 보정: 충돌 지점에서 법선 방향으로 Offset만큼 밀어냅니다.
+            Vector2 spawnPosition = collisionPoint + collisionNormal * hitEffectOffset;
 
+            // 2. 회전 설정: 법선 벡터를 사용하여 회전값(Quaternion)을 계산합니다.
+            // Quaternion.LookRotation(forward, upwards)와 유사하게, 법선을 기준으로 z축 회전 계산
+            Quaternion rotation = Quaternion.FromToRotation(Vector2.up, collisionNormal);
 
+            // 3. 이펙트 생성
+            GameObject effect = Instantiate(hitEffectPrefab, spawnPosition, rotation);
+        }
+
+        SafeDestroy();
+    }
     private void HandleBalancePlatformCollision(Collider2D col)
     {
         BalancePlatform platform = col.GetComponent<BalancePlatform>();

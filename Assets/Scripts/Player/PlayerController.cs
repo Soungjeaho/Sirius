@@ -26,6 +26,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float attackRadius = 0.5f;
     [SerializeField] private int attackDamage = 1;
     private bool isAttackLoopRunning = false;
+    private bool triggerAttack = false;
 
     [Header("Mouse Front Limit")]
     [SerializeField] private float mouseFrontOffsetX = 0.2f;   // 손 기준으로 얼마나 앞에서부터 허용할지
@@ -34,7 +35,6 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private GameObject slashVFX;
     [SerializeField] private float slashAngleOffset = 0f;
     [SerializeField] private float slashBaseLength = 1f; // scale.x = 1일 때 이펙트의 기준 길이
-
 
     [Header("References")]
     [SerializeField] private SpriteRenderer spriteRenderer;
@@ -95,6 +95,16 @@ public class PlayerController : MonoBehaviour
         get
         {
             return facingRight;
+        }
+    }
+    public bool TriggerAttack
+    {
+        get
+        {
+            // Animator에서 사용 후 바로 false로 리셋
+            bool result = triggerAttack;
+            triggerAttack = false;
+            return result;
         }
     }
 
@@ -376,6 +386,7 @@ public class PlayerController : MonoBehaviour
         {
             return;
         }
+        triggerAttack = true;
 
         bool killedEnemy = false;
 

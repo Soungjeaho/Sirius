@@ -71,8 +71,6 @@ public class HeavyFloat : MonoBehaviour
 
         Vector2 mousePos = m_cam.ScreenToWorldPoint(Input.mousePosition);
         fireDirection = (mousePos - (Vector2)firePoint.position).normalized;
-
-        // 🔹 여기서는 더 이상 Flip을 하지 않는다.
         //    몸 방향 / FirePoint 좌우 위치는 PlayerController가 관리.
     }
 
@@ -89,7 +87,7 @@ public class HeavyFloat : MonoBehaviour
             return;
         }
 
-        // 🔹 게이지 부족이면 발사 자체를 막기
+        // 게이지 부족이면 발사 자체를 막기
         if (gauge != null && gaugeCost > 0)
         {
             if (!gauge.UseGauge(gaugeCost))

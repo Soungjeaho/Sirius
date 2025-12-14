@@ -99,8 +99,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bdb7d222975debf45ad355f108aeb202, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  hitEffectPrefab: {fileID: 8246738660098150629, guid: 0e77edb33dd765746aeca0b0dc8ac81a, type: 3}
+  hitEffectOffset: 0.3
   damage: 2
-  knockbackForce: 20
+  knockbackForce: 10
   enemyDestroyDelay: 0.2
   remainTime: 1
   backDeleteDistance: 1
