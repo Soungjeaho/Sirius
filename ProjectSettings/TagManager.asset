@@ -5,28 +5,19 @@ TagManager:
   serializedVersion: 2
   tags:
   - Ground
-  - Reelbackable
-  - Enemy
   - RB_Wall
-  - Wall
-  - Obstacle
-  - BalanceTilemap
-  - CrackedTilemap
-  - Switch
-  - HeavyProjectile
-  - BalancePlatform
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - Hook
+  - Ground
   - Water
   - UI
-  - Reelbackable
-  - obstacleMask
-  - Player
-  - Enemy
-  - Ground
+  - 
+  - 
+  - 
+  - 
+  - 
   - 
   - 
   - 
