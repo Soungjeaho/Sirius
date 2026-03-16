@@ -23,6 +23,7 @@ namespace ProjectConductor
 
         private Rigidbody2D rb;
         private float moveInput;
+        private bool canMove = true;
         private KeyCode jumpKey;
         public KeyCode interactionKey;
 
@@ -100,7 +101,10 @@ namespace ProjectConductor
         }
         void FixedUpdate()
         {
-            rb.velocity = new Vector2(moveInput * moveSpeed, rb.velocity.y);
+            if (canMove)
+            {
+                rb.velocity = new Vector2(moveInput * moveSpeed, rb.velocity.y);
+            }
         }
 
         private void CheckInteraction()
@@ -118,5 +122,26 @@ namespace ProjectConductor
                 }
             }
         }
+        public void UpdateFacingDirection(float input)
+        {
+            if (input > 0) facingDirection = 1f;
+            else if (input < 0) facingDirection = -1f;
+
+            // 빈 오브젝트(FacingDirectionObject) 위치도 함께 업데이트
+            if (facingDirectionObject != null)
+            {
+                float posX = Mathf.Abs(facingDirectionObject.localPosition.x);
+                facingDirectionObject.localPosition = new Vector3(posX * facingDirection, facingDirectionObject.localPosition.y, 0);
+            }
+
+            // 캐릭터 이미지(Sprite) Flip 처리 (기존에 로직이 있다면 호출)
+            transform.localScale = new Vector3(facingDirection, 1, 1);
+        }
+        public void SetMoveLock(bool isLocked)
+        {
+            canMove = !isLocked;
+            if (isLocked) rb.velocity = new Vector2(0, rb.velocity.y); // 즉시 정지
+        }
+   
     }
 }
